@@ -1,0 +1,10 @@
+
+
+pos final - pos inicial = distancia da posicao original
+
+pos atual - pos anterior = distancia percorrica => acumulando, temos distancia total
+
+determinar distancia minima para formar um grupo
+	|distancia entre pessoas| < limite_de_grupo
+	
+variação de velocidade das pessoas
