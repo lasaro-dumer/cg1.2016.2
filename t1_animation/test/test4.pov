@@ -7,7 +7,7 @@
 camera {
     location <0, 10, 6>
     look_at <0, 0, 0>
-    //translate <0,camPos,-1*camPos>
+    translate <0,camPos,-1*camPos>
   }
   light_source { <20, 20, -20> color White }
   plane {
@@ -27,7 +27,7 @@ camera {
       scale .25
     }
     rotate <0, -clock*360,0>
-    //translate <-pi, 1, 0>
+    translate <-pi, 1, 0>
     //translate <sin(2*pi*clock), 0,cos(2*pi*clock)>
     //translate <1+clock, 0,0>
   }
