@@ -25,9 +25,18 @@ global_settings {max_trace_level 5}
 #end
 
 camera {
-    location <0, Camera_Y,Camera_Z>
+    location <5, Camera_Y,Camera_Z>
     look_at <0,0,0>
 }
+
+#declare lineLength = 50;
+#declare xLine = cylinder { <0.1,0,0> <1,0,0> 0.05 pigment { color Red} };
+#declare yLine = cylinder { <0,0.1,0> <0,1,0> 0.05 pigment { color Blue} };
+#declare zLine = cylinder { <0,0,0.1> <0,0,1> 0.05 pigment { color Green} };
+
+object { xLine transform { scale <lineLength,0,0> } }
+object { yLine transform { scale <0,lineLength,0> } }
+object { zLine transform { scale <0,0,lineLength> } }
 
 // Uncomment the area lights only if you've got lots of time.
 #declare Dist=80.0;
@@ -41,19 +50,7 @@ light_source {
         texture {
         pigment {
            gradient y
-           colour_map {
-              [0.00, Red]
-              [0.10, Yellow]
-              [0.20, Red]
-              [0.30, Yellow]
-              [0.40, Red]
-              [0.50, Yellow]
-              [0.60, Red]
-              [0.70, Yellow]
-              [0.80, Red]
-              [0.90, Yellow]
-              [1.00, Red]
-           }
+           colour_map { [0.00, Red] [0.10, Yellow] [0.20, Red] [0.30, Yellow] [0.40, Red] [0.50, Yellow] [0.60, Red] [0.70, Yellow] [0.80, Red] [0.90, Yellow] [1.00, Red] }
           turbulence turbMod
           scale <1, 1, 1>
         }

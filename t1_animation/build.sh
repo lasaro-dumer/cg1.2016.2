@@ -41,6 +41,7 @@ printf "Input dir is %s\n" "$IDIR"
 printf "Output dir is %s\n" "$arg_1"
 echo FPS is $FPS
 echo width=$W height=$H
+rm -rf $BASE*.png
 if [ -z "$KFF" ]; then
   povray $BASE.ini +I$BASE.pov +FN +O$BASE +W$W +H$H
 else
