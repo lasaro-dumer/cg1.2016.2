@@ -14,7 +14,7 @@ global_settings {max_trace_level 5}
 #declare Zoom_Start  = 0.5;
 #declare Zomm_Dist = 15;
 //clock = 0.6;
-#declare camTime = clock-Zoom_Start;  
+#declare camTime = clock-Zoom_Start;
 #declare turbMod = cos(pi*clock);
 #if (clock < Zoom_Start )
     #declare Camera_Y = 15.00;
@@ -42,36 +42,25 @@ light_source {
         pigment {
            gradient y
            colour_map {
-              [0.00, Red]   
-              [0.10, Yellow] 
-              [0.20, Red]   
+              [0.00, Red]
+              [0.10, Yellow]
+              [0.20, Red]
               [0.30, Yellow]
-              [0.40, Red]   
+              [0.40, Red]
               [0.50, Yellow]
-              [0.60, Red]   
+              [0.60, Red]
               [0.70, Yellow]
-              [0.80, Red]   
+              [0.80, Red]
               [0.90, Yellow]
-              [1.00, Red]   
+              [1.00, Red]
            }
           turbulence turbMod
           scale <1, 1, 1>
-        }        
+        }
         normal { bumps 0.4 scale 0.2 }
         finish { ambient 1}
         rotate <0, -clock*360,0>
       }
-        /*
-        texture { T_Glass4
-            //pigment { color Yellow }
-            finish { specular 1 roughness 0.15 ambient 1
-                metallic
-                irid { 0.25 //simulates iridescense = interferences at thin layers (films of oil etc.) 0.25 = part of reflected light
-                    thickness 0.2 // of the layer
-                    turbulence clock }
-            }
-        }   
-        */
     }
 }
 
@@ -86,76 +75,33 @@ sky_sphere {
 
 #declare Planet_1 =
 sphere { <0,0, 0>, 0.7
-    /*
     texture {
-      pigment {
-        wood
-        color_map {
-          [0.0 color Red]
-          [0.5 color Red]
-          [0.5 color Blue]
-          [1.0 color Blue]
-        }
-        scale <0.2, 0.3, 1>
-      }
-      finish { phong 1 }
-    }
-    texture {
-        pigment { color Yellow }
-        normal { bumps 0.4 scale 0.2 }
-        finish { phong 1 }
-        rotate <0, -clock*360,0>
-    }
-    texture { T_Wood20
-        finish { specular 0.15 roughness 0.15 ambient 1 }
-    }  
-    /      
-    texture {
-       pigment{ crackle scale 1.5 turbulence 0.35
-         color_map { [0.00 color rgb<0,0,0>]
-                     [0.08 color rgb<0,0,0>]
-                     [0.32 color rgb<1,0.65,0>]
-                     [1.00 color rgb<1,1.0,0.5>]
-                   } // end of color_map
-         scale 0.2
-       } // end of pigment -------------
-    }      
-    */  
-    texture { T_Wood20
         pigment{ crackle scale 1.5 turbulence 0.35
-         color_map { [0.00 color rgb<0,0,0>]
-                     [0.08 color rgb<0,0,0>]
-                     [0.32 color rgb<1,0.65,0>]
-                     [1.00 color rgb<1,1.0,0.5>]
-                   } // end of color_map
-         scale 0.2
-       }       
-        finish { specular 0.15 roughness 0.15 ambient 0.5 }
-    }  
+            color_map {
+                [0.00 color rgb<0,0,0>]
+                [0.08 color rgb<0,0,0>]
+                [0.32 color rgb<1,0.65,0>]
+                [1.00 color rgb<1,1.0,0.5>]
+            }
+            scale 0.2
+       }
+    }
 }
 
 
 #declare Planet_2 =
 sphere { <0, 0, 0>, 0.45
-    texture { T_Wood20
-        finish { specular 0.15 roughness 0.15 ambient 0.3 }
+    texture {
+        pigment{ color rgb <1,1,1>}
+        normal { marble 1.5 scale 0.5 turbulence turbMod}
     }
 }
 
 #declare Planet_3 =
 sphere { <0, 0, 0>, 0.5
     texture {
-        pigment {
-            gradient x
-                color_map {
-                    [0.0 Blue  ]
-                    [0.5 Blue  ]
-                    [0.5 Green ]
-                    [1.0 Red ]
-                }
-                scale .25
-            }
-        finish { specular 0.15 roughness 0.15 ambient 0.3 }
+        pigment{ color rgb <0.55,0.45,0.3>}
+        normal { granite 1.5  scale 1}
     }
 }
 
@@ -174,21 +120,23 @@ text { ttf "arial.ttf", "Rotation", 0.2 , 0
      } // end of text object --------
 */
 
-#declare day5
+#declare day4
     = transform { rotate <0,4*(-clock*360),0>}
+#declare day2
+    = transform { rotate <0,2*(-clock*360),0>}
 #declare orbitPoint = pi*clock;
 #declare orbit_1
     = transform { translate <10*sin(2*orbitPoint),0,10*cos(2*orbitPoint)> }
 #declare orbit_2
     = transform { translate <8*sin(4*orbitPoint),0,4*cos(4*orbitPoint)> }
 #declare orbit_3
-    = transform { translate <2*sin(2*orbitPoint),0,2*cos(2*orbitPoint)> }
+    = transform { translate <2*sin(6*orbitPoint),0,2*cos(6*orbitPoint)> }
 
 #declare Planets =
 union {
-   object { Planet_1 transform orbit_1 }
+   object { Planet_1 transform day2 transform orbit_1 }
    object { Planet_2 transform orbit_2 }
-   object { Planet_3 transform day5 transform orbit_3 }
+   object { Planet_3 transform day4 transform orbit_3 }
 }
 
 union {
