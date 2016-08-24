@@ -116,18 +116,18 @@ text { ttf "arial.ttf", "Rotation", 0.2 , 0
        //rotate<0,-15,0>
      } // end of text object --------
 */
+#declare orbitPoint = pi*clock;
+// macros can have parameters and are useful for 'programming' scenes
+#macro objTranslation(majorR,minorR,speed)
+        transform { translate <majorR*sin((speed*2)*orbitPoint),0,minorR*cos((speed*2)*orbitPoint)> }
+#end
 
 #declare day4
     = transform { rotate <0,4*(-clock*360),0>}
-#declare day2
-    = transform { rotate <0,2*(-clock*360),0>}
-#declare orbitPoint = pi*clock;
-#declare orbit_1
-    = transform { translate <10*sin(2*orbitPoint),0,10*cos(2*orbitPoint)> }
-#declare orbit_2
-    = transform { translate <8*sin(4*orbitPoint),0,4*cos(4*orbitPoint)> }
-#declare orbit_3
-    = transform { translate <2*sin(6*orbitPoint),0,2*cos(6*orbitPoint)> }
+#declare day2 = transform { rotate <0,2*(-clock*360),0>}
+#declare orbit_1 = objTranslation(10,10,1);
+#declare orbit_2 = objTranslation(8,4,2);
+#declare orbit_3 = objTranslation(2,2,3);
 
 #declare Planets =
 union {
