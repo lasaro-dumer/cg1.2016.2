@@ -18,3 +18,22 @@ union{
 
 }  // end of union
 #end//-----------------------------------------------------------
+
+#macro DrawSPLine(SPLineObj)//----------------------------------------
+union{
+    #declare Nr = 0;     // start
+    #declare EndNr = 1; // end
+    #while (Nr< EndNr)                  
+        sphere{ <0,0,0>,0.01
+            scale<1,1,1>                
+            texture{ pigment{color rgb <1-Nr/2,0.75+Nr/4,0>}
+                finish {ambient 0.15 diffuse 0.85 phong 1}
+            }                           
+            translate SPLineObj(Nr)
+        } // end of sphere              
+        #declare Nr = Nr + 0.0005;  // next Nr
+    #end // --------------- end of loop    
+    rotate<0,0,0>
+    translate<0,0,0>
+} /// end of union  ----------------------------------------     
+#end//-----------------------------------------------------------

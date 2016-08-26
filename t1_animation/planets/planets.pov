@@ -8,7 +8,7 @@
 #include "metals.inc"
 #include "glass.inc"
 #include "woods.inc"
-#include "marker.inc"
+#include "marker.inc"  
 #include "orbits.inc"
 
 global_settings {max_trace_level 5}
@@ -28,9 +28,8 @@ global_settings {max_trace_level 5}
 
 #declare day4 = transform { rotate <0,4*(-clock*360),0>}
 #declare day2 = transform { rotate <0,2*(-clock*360),0>}
-#declare orbit_1 = objTranslation(10,10,1,clock);
-#declare orbit_2 = objTranslation(8,4,2,clock);
-#declare orbit_3 = objTranslation(2,2,3,clock);
+#declare orbit_1 = objTranslation(10,10,1*clock);
+#declare orbit_2 = objTranslation(8,4,2*clock);
 
 camera {
     //location <5, Camera_Y,Camera_Z>
@@ -46,28 +45,7 @@ object{ Marker(<0,1,0>, Red ) objTranslation(2,2,3,0.25)}
 object{ Marker(<0,1,0>, Red ) objTranslation(2,2,3,0.5)}
 object{ Marker(<0,1,0>, Red ) objTranslation(2,2,3,0.75)}
 */
-
-union{
- #declare Nr = 0;     // start
- #declare EndNr = 1; // end
- #while (Nr< EndNr)
-
- sphere{ <0,0,0>,0.01
-         scale<1,1,1>
-
-	 texture{ pigment{color rgb <1-Nr/2,0.75+Nr/4,0>}
-	          finish {ambient 0.15 diffuse 0.85 phong 1}
-                }
-
-         translate Spline_1(Nr)
-       } // end of sphere
-
- #declare Nr = Nr + 0.0005;  // next Nr
- #end // --------------- end of loop
-
-rotate<0,0,0>
-translate<0,0,0>
-} /// end of union  ----------------------------------------
+object{ DrawSPLine(OrbitLine1) }    
 
 #declare lineLength = 50;
 #declare xLine = cylinder { <0.1,0,0> <1,0,0> 0.05 pigment { color Red} };
@@ -173,7 +151,8 @@ text { ttf "arial.ttf", "Rotation", 0.2 , 0
 union {
    object { Planet_1 transform day2 transform orbit_1 }
    object { Planet_2 transform orbit_2 }
-   object { Planet_3 transform day4 translate Spline_1(clock) }
+   //object { Planet_3 transform day4 translate OrbitLine1(3*clock) }
+   object { Planet_3 transform day4 translate OrbitLine1(abs(cos(clock*3*pi))) }
 }
 
 union {
