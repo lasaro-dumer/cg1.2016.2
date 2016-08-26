@@ -4,6 +4,7 @@ H=768
 FPS=30
 IDIR=""
 DIG=2
+GIF=true
 while getopts ":p:i:o:w:h:f:s:" opt; do
   case $opt in
     p) POVFile="$OPTARG"
@@ -41,12 +42,16 @@ printf "Input dir is %s\n" "$IDIR"
 printf "Output dir is %s\n" "$arg_1"
 echo FPS is $FPS
 echo width=$W height=$H
+workdir=${PWD}          # to assign to a variable
+
 rm -rf $BASE*.png
 if [ -z "$KFF" ]; then
-  povray $BASE.ini +I$BASE.pov +FN +O$BASE +W$W +H$H
+  povray $BASE.ini +I$BASE.pov +FN +O$BASE +W$W +H$H -GA -V -WL0 +L$workdir/lib +L$workdir
 else
   echo Final frame is $KFF
-  if [[ "$KFF" -lt 10 ]]; then
+  if [[ "$KFF" -eq 1 ]]; then
+    GIF=false
+  elif [[ "$KFF" -lt 10 ]]; then
     DIG=1
   elif [[ "$KFF" -lt 100 ]]; then
     DIG=2
@@ -54,7 +59,12 @@ else
     DIG=3
   else
     echo Invalid max frames, the max is 999
+    exit
   fi
-  povray $BASE.ini +I$BASE.pov +FN +O$BASE +W$W +H$H +KFF$KFF
+  povray $BASE.ini +I$BASE.pov +FN +O$BASE +W$W +H$H +KFF$KFF -GA -V -WL0 +L$workdir/lib +L$workdir
 fi
-ffmpeg -f image2 -framerate $FPS -i $BASE%0"$DIG"d.png $ODIR/$POVFile.gif -y
+if [[ "$GIF" == true ]]; then
+  #statements
+  ffmpeg -f image2 -framerate $FPS -i $BASE%0"$DIG"d.png $ODIR/$POVFile.gif -y
+  rm -rf $BASE*.png
+fi
