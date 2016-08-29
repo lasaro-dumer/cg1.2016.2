@@ -1,6 +1,8 @@
 // planets.pov
 // -w320 -h240
-// -w800 -h600 +a0.3
+// -w800 -h600
+// -w1024 -h768
+// -w1400 -h1050
 
 #include "colors.inc"
 #include "textures.inc"
@@ -8,16 +10,15 @@
 #include "metals.inc"
 #include "glass.inc"
 #include "woods.inc"
-#include "marker.inc"  
+#include "marker.inc"
 #include "orbits.inc"
 
 global_settings {max_trace_level 5}
 
 #declare Zoom_Start  = 0.5;
 #declare Zomm_Dist = 15;
-//clock = 0.6;
 #declare camTime = clock-Zoom_Start;
-#declare turbMod = cos(pi*clock);
+#declare turbMod = abs(cos(pi*clock));
 #if (clock < Zoom_Start )
     #declare Camera_Y = 15.00;
     #declare Camera_Z = -5.00;
@@ -25,11 +26,6 @@ global_settings {max_trace_level 5}
     #declare Camera_Y = 15.00  + Zomm_Dist * 0.5*(1-cos(4*pi*(camTime)));
     #declare Camera_Z = -5.00 - Zomm_Dist * 0.5*(1-cos(4*pi*(camTime)));
 #end
-
-#declare day4 = transform { rotate <0,4*(-clock*360),0>}
-#declare day2 = transform { rotate <0,2*(-clock*360),0>}
-#declare orbit_1 = objTranslation(10,10,1*clock);
-#declare orbit_2 = objTranslation(8,4,2*clock);
 
 camera {
     //location <5, Camera_Y,Camera_Z>
@@ -45,7 +41,9 @@ object{ Marker(<0,1,0>, Red ) objTranslation(2,2,3,0.25)}
 object{ Marker(<0,1,0>, Red ) objTranslation(2,2,3,0.5)}
 object{ Marker(<0,1,0>, Red ) objTranslation(2,2,3,0.75)}
 */
-object{ DrawSPLine(OrbitLine1) }    
+object{ DrawSPLine(OrbitLine1) }
+object{ DrawSPLine(OrbitLine2) }
+object{ DrawSPLine(OrbitLine3) }
 
 #declare lineLength = 50;
 #declare xLine = cylinder { <0.1,0,0> <1,0,0> 0.05 pigment { color Red} };
@@ -101,6 +99,22 @@ plane {
 }
 //*/
 #declare Planet_1 =
+sphere { <0, 0, 0>, 0.5
+  texture {
+    pigment{ color rgb <0.55,0.45,0.3>}
+    normal { granite 1.5  scale 1}
+  }
+}
+
+#declare Planet_2 =
+sphere { <0, 0, 0>, 0.45
+  texture {
+    pigment{ color rgb <1,1,1>}
+    normal { marble 1.5 scale 0.5 turbulence turbMod}
+  }
+}
+
+#declare Planet_3 =
 sphere { <0,0, 0>, 0.7
     texture {
         pigment{ crackle scale 1.5 turbulence 0.35
@@ -112,23 +126,6 @@ sphere { <0,0, 0>, 0.7
             }
             scale 0.2
        }
-    }
-}
-
-
-#declare Planet_2 =
-sphere { <0, 0, 0>, 0.45
-    texture {
-        pigment{ color rgb <1,1,1>}
-        normal { marble 1.5 scale 0.5 turbulence turbMod}
-    }
-}
-
-#declare Planet_3 =
-sphere { <0, 0, 0>, 0.5
-    texture {
-        pigment{ color rgb <0.55,0.45,0.3>}
-        normal { granite 1.5  scale 1}
     }
 }
 
@@ -149,10 +146,9 @@ text { ttf "arial.ttf", "Rotation", 0.2 , 0
 
 #declare Planets =
 union {
-   object { Planet_1 transform day2 transform orbit_1 }
-   object { Planet_2 transform orbit_2 }
-   //object { Planet_3 transform day4 translate OrbitLine1(3*clock) }
-   object { Planet_3 transform day4 translate OrbitLine1(abs(cos(clock*3*pi))) }
+    object { Planet_1 transform days(40) translate OrbitLine1(clamp(clock*8, 0, 1)) }
+    object { Planet_2 transform days(20) translate OrbitLine2(clamp(clock*4, 0, 1)) }
+    object { Planet_3 transform days(10) translate OrbitLine3(clamp(clock*2, 0, 1)) }
 }
 
 union {

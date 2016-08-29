@@ -4,8 +4,10 @@ H=768
 FPS=30
 IDIR=""
 DIG=2
-GIF=true
-while getopts ":p:i:o:w:h:f:s:" opt; do
+COMPILE=true
+KEEP=false
+GIF=false
+while getopts ":p:i:o:w:h:f:s:k:g:" opt; do
   case $opt in
     p) POVFile="$OPTARG"
     ;;
@@ -20,6 +22,10 @@ while getopts ":p:i:o:w:h:f:s:" opt; do
     f) KFF="$OPTARG"
     ;;
     s) FPS="$OPTARG"
+    ;;
+    k) KEEP=true
+    ;;
+    g) GIF=true
     ;;
     \?) echo "Invalid option -$OPTARG" >&2
     ;;
@@ -50,7 +56,7 @@ if [ -z "$KFF" ]; then
 else
   echo Final frame is $KFF
   if [[ "$KFF" -eq 1 ]]; then
-    GIF=false
+    COMPILE=false
   elif [[ "$KFF" -lt 10 ]]; then
     DIG=1
   elif [[ "$KFF" -lt 100 ]]; then
@@ -63,8 +69,13 @@ else
   fi
   povray $BASE.ini +I$BASE.pov +FN +O$BASE +W$W +H$H +KFF$KFF -GA -V -WL0 +L$workdir/lib +L$workdir
 fi
-if [[ "$GIF" == true ]]; then
-  #statements
-  ffmpeg -f image2 -framerate $FPS -i $BASE%0"$DIG"d.png $ODIR/$POVFile.gif -y
-  rm -rf $BASE*.png
+if [[ "$COMPILE" == true ]]; then
+  if [[ "$GIF" == false ]]; then
+    ffmpeg -framerate $FPS -i $BASE%0"$DIG"d.png -s:v "$W"x"$H" $ODIR/$POVFile.mp4 -y
+  else
+    ffmpeg -f image2 -framerate $FPS -i $BASE%0"$DIG"d.png $ODIR/$POVFile.gif -y
+  fi
+  if [[ "$KEEP" == false ]]; then
+    rm -rf $BASE*.png
+  fi
 fi

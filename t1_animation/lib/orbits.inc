@@ -1,10 +1,11 @@
-
-//#declare orbitPoint = pi*clock;
 // macros can have parameters and are useful for 'programming' scenes
 #macro objTranslation(majorR,minorR,orbitPoint)
-        transform { translate <majorR*sin(2*pi*orbitPoint),0,minorR*cos(2*pi*orbitPoint)> }
+  transform { translate <majorR*sin(2*pi*orbitPoint),0,minorR*cos(2*pi*orbitPoint)> }
 #end
-         
+#macro days(daysPerOrbit)
+  { rotate <0,daysPerOrbit*(-clock*360),0> }
+#end
+
 #macro CirclePoints(aR,bR)
     0.000, vtransform(<0,0,0>,objTranslation(aR,bR,0))	, // control point
     0.000, vtransform(<0,0,0>,objTranslation(aR,bR,0))	, // starting point
@@ -27,4 +28,16 @@
   spline {
     natural_spline
     CirclePoints(2,2)
-  }// end of spline ---------------
+  }
+
+#declare OrbitLine2 =
+  spline {
+    natural_spline
+    CirclePoints(8,4)
+  }
+
+#declare OrbitLine3 =
+  spline {
+    natural_spline
+    CirclePoints(10,10)
+  }
