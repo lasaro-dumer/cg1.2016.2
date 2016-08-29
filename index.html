@@ -2,19 +2,33 @@
 <html lang="en">
 
   <head>
+		<base href="/">
 		<meta charset="utf-8">
 		<title>Computação Gráfica 1</title>
+		<link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+		<script src="bower_components/jquery/dist/jquery.min.js"></script>
+		<script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+		<script src="bower_components/angular/angular.min.js"></script>
+		<script src="bower_components/angular-route/angular-route.min.js"></script>
+		<script src="js/cg1.js"></script>
 	</head>
-	<body>
-		<div>
-			Lásaro Dumer & Marlon Rossi
-		</div>
-		<div>
-			<img src="t1_animation/gifs/Woodbox1.gif"/>
-			<img src="t1_animation/gifs/woodbox.gif"/>
-			<img src="https://github.com/lasaro-dumer/cg1.2016.2/releases/download/0.0.1/planets1.gif"/>
-			<img src="t1_animation/gifs/planets2.gif"/>
-			<img src="t1_animation/gifs/planets3.gif"/>
-		</div>
+	<body ng-app="cg1App" ng-controller="cg1Controller">
+		  Choose:
+		  <a href="Book/Moby">Moby</a> |
+		  <a href="Book/Moby/ch/1">Moby: Ch1</a> |
+		  <a href="Book/Gatsby">Gatsby</a> |
+		  <a href="Book/Gatsby/ch/4?key=value">Gatsby: Ch4</a> |
+		  <a href="Book/Scarlet">Scarlet Letter</a><br/>
+
+		  <div ng-view></div>
+
+		  <hr />
+
+		  <pre>$location.path() = {{$location.path()}}</pre>
+		  <pre>$route.current.templateUrl = {{$route.current.templateUrl}}</pre>
+		  <pre>$route.current.params = {{$route.current.params}}</pre>
+		  <pre>$route.current.scope.name = {{$route.current.scope.name}}</pre>
+		  <pre>$routeParams = {{$routeParams}}</pre>
+		
 	</body>
 </html>

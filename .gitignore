@@ -3,3 +3,6 @@ t1_animation/test/*.png
 t1_animation/woodbox/*.png
 *.bak
 *~
+_site
+*.lock
+bower_components
