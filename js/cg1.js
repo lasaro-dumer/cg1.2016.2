@@ -13,13 +13,13 @@ app.controller('cg1Controller', function($scope, $route, $routeParams, $location
         $routeProvider
             .when('/Blog/:project/files', {
                 templateUrl: function(params) {
-                    return 'blog/'+params.project+'/files.html';
+                    return 'cg1.2016.2/blog/'+params.project+'/files.html';
                 },
                 controller: 'ProjectController'
             })
             .when('/Blog/:project/diary/:entry', {
                 templateUrl: function(params) {
-                    return 'blog/'+params.project+'/' + params.entry + '.html';
+                    return 'cg1.2016.2/blog/'+params.project+'/' + params.entry + '.html';
                 },
                 controller: 'ProjectController'
             });
