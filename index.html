@@ -6,29 +6,86 @@
 	<meta charset="utf-8">
 	<title>Computação Gráfica 1</title>
 	<link rel="stylesheet" href="public/css/bootstrap.min.css">
+	<link rel="stylesheet" href="public/css/nav-side-menu.css">
 	<script src="public/js/jquery.min.js"></script>
 	<script src="public/js/bootstrap.min.js"></script>
 	<script src="public/js/angular.min.js"></script>
 	<script src="public/js/angular-route.min.js"></script>
 	<script src="js/cg1.js"></script>
+	<script type="text/javascript">
+	$(document).ready(function(){
+		$('ul.menu-content li.collapsed a span').addClass('glyphicon glyphicon-chevron-down');
+		$('ul.sub-menu li a span').addClass('glyphicon glyphicon-chevron-right');
+	});
+	</script>
 </head>
 
 <body ng-app="cg1App" ng-controller="cg1Controller">
-	<ul>
-		<li><a href="Blog/animation/diary/inicio">Inicio</a></li>
-		<li><a href="Blog/animation/files">Arquivos</a></li>
-	</ul>
-	<br/>
-	<div ng-view>
-		Texto default
-	</div>
-	<hr />
-	<pre>$location.path() = {{$location.path()}}</pre>
-	<pre>$route.current.templateUrl = {{$route.current.templateUrl}}</pre>
-	<pre>$route.current.params = {{$route.current.params}}</pre>
-	<pre>$route.current.scope.name = {{$route.current.scope.name}}</pre>
-	<pre>$routeParams = {{$routeParams}}</pre>
+	<!--a href="Blog/animation/diary/inicio">Inicio</a>
+	<a href="Blog/animation/files">Arquivos</a-->
+	<div class="nav-side-menu">
+		<div class="brand">Brand Logo</div>
+		<i class="fa fa-bars fa-2x toggle-btn" data-toggle="collapse" data-target="#menu-content"></i>
+		<div class="menu-list">
+			<ul id="menu-content" class="menu-content collapse out">
+				<li>
+					<a href="#">
+						<i class="fa fa-dashboard fa-lg"></i> Dashboard
+					</a>
+				</li>
+				<li data-toggle="collapse" data-target="#products" class="collapsed active">
+					<a href="#"><i class="fa fa-gift fa-lg"></i> UI Elements <span></span></a>
+				</li>
+				<ul class="sub-menu collapse" id="products">
+					<li><a href="#"><span></span>CSS3 Animation</a></li>
+					<li class="active"><a href="#"><span></span>General</a></li>
+					<li><a href="Blog/animation/diary/inicio"><span></span>Inicio</a></li>
+					<li><a href="Blog/animation/files"><span></span>Arquivos</a></li>
+				</ul>
+				<li data-toggle="collapse" data-target="#service" class="collapsed">
+					<a href="#"><i class="fa fa-globe fa-lg"></i> Services <span></span></a>
+				</li>
+				<ul class="sub-menu collapse" id="service">
+					<li>New Service 1</li>
+					<li>New Service 2</li>
+					<li>New Service 3</li>
+				</ul>
 
+
+				<li data-toggle="collapse" data-target="#new" class="collapsed">
+					<a href="#"><i class="fa fa-car fa-lg"></i> New <span></span></a>
+				</li>
+				<ul class="sub-menu collapse" id="new">
+					<li>New New 1</li>
+					<li>New New 2</li>
+					<li>New New 3</li>
+				</ul>
+				<li>
+					<a href="#">
+						<i class="fa fa-user fa-lg"></i> Profile
+					</a>
+				</li>
+				<li>
+					<a href="#">
+						<i class="fa fa-users fa-lg"></i> Users
+					</a>
+				</li>
+			</ul>
+		</div>
+	</div>
+	<!-- Page Content -->
+	<div class="container" id="main">
+		<div ng-view>
+			Texto default
+		</div>
+		<hr />
+		<pre>$location.path() = {{$location.path()}}</pre>
+		<pre>$route.current.templateUrl = {{$route.current.templateUrl}}</pre>
+		<pre>$route.current.params = {{$route.current.params}}</pre>
+		<pre>$route.current.scope.name = {{$route.current.scope.name}}</pre>
+		<pre>$routeParams = {{$routeParams}}</pre>
+	</div>
+	<!-- /#page-content-wrapper -->
 </body>
 
 </html>
