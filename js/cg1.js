@@ -13,16 +13,22 @@ app.controller('cg1Controller', function($scope, $route, $routeParams, $location
         $routeProvider
             .when('/Blog/:project/files', {
                 templateUrl: function(params) {
-                    return 'cg1.2016.2/blog/'+params.project+'/files.html';
+                    return 'cg1.2016.2/blog/' + params.project + '/files.html';
                 },
                 controller: 'ProjectController'
             })
             .when('/Blog/:project/diary/:entry', {
                 templateUrl: function(params) {
-                    return 'cg1.2016.2/blog/'+params.project+'/' + params.entry + '.html';
+                    return 'cg1.2016.2/blog/' + params.project + '/' + params.entry + '.html';
                 },
                 controller: 'ProjectController'
-            });
+            })
+            .otherwise({
+                templateUrl: 'cg1.2016.2/blog/message.html',
+                controller: function($scope) {
+                    $scope.message = 'Bem vindo, confira no menu ao lado nossos projetos para a disciplina de Computação Gráfica 1';
+                }
+            });//*/;
         // configure html5 to get links working on jsfiddle
         $locationProvider.html5Mode(true);
     });
