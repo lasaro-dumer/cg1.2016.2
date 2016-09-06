@@ -6,3 +6,6 @@ t1_animation/woodbox/*.png
 _site
 *.lock
 bower_components
+/t1_analysis/nbproject/private/
+/t1_analysis/build/
+/t1_analysis/dist/
