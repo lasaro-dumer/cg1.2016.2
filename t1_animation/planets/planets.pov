@@ -27,11 +27,23 @@ global_settings {max_trace_level 5}
     #declare Camera_Z = -5.00 - Zomm_Dist * 0.5*(1-cos(4*pi*(camTime)));
 #end
 
+#if (clock <= 0.125)
+    #declare camPos = CamLine(clamp(clock,0,0.125));
+    //object{ Tracker(camPos, Red )  }
+    ////object{ Tracker(CamLine(clock*4), Red )  }
+#else
+    #declare camPos = CamLine(clock);
+    //object{ Tracker(camPos, Blue )  }
+#end
 camera {
     //location <5, Camera_Y,Camera_Z>
     //location <5, 30,-20>
-    location <5, 5,-5>
-    look_at <0,0,0>//<2*sin((3*2)*orbitPoint),0,2*cos((3*2)*orbitPoint)>
+
+    //location <5, 5,-5>
+    //look_at <0,0,0>//<2*sin((3*2)*orbitPoint),0,2*cos((3*2)*orbitPoint)>
+
+    location camPos
+    look_at OrbitLine1(clamp(clock*8, 0, 1))
 }
 
 light_source { <20, 20, -20> color White }
@@ -44,11 +56,12 @@ object{ Marker(<0,1,0>, Red ) objTranslation(2,2,3,0.75)}
 object{ DrawSPLine(OrbitLine1) }
 object{ DrawSPLine(OrbitLine2) }
 object{ DrawSPLine(OrbitLine3) }
+//object{ DrawSPLine(CamLine) }
 
 #declare lineLength = 50;
-#declare xLine = cylinder { <0.1,0,0> <1,0,0> 0.05 pigment { color Red} };
-#declare yLine = cylinder { <0,0.1,0> <0,1,0> 0.05 pigment { color Blue} };
-#declare zLine = cylinder { <0,0,0.1> <0,0,1> 0.05 pigment { color Green} };
+#declare xLine = cylinder { <0.01,0,0> <1,0,0> 0.01 pigment { color Red} };
+#declare yLine = cylinder { <0,0.01,0> <0,1,0> 0.01 pigment { color Blue} };
+#declare zLine = cylinder { <0,0,0.01> <0,0,1> 0.01 pigment { color Green} };
 
 //object { xLine transform { scale <lineLength,0,0> } }
 //object { yLine transform { scale <0,lineLength,0> } }
@@ -62,7 +75,7 @@ light_source {
     fade_distance Dist
     fade_power 2
     looks_like {
-        sphere { <0,0,0>,1 }
+        sphere { <0,0,0>,0.85 }
         texture {
         pigment {
            gradient y
@@ -146,9 +159,9 @@ text { ttf "arial.ttf", "Rotation", 0.2 , 0
 
 #declare Planets =
 union {
-    object { Planet_1 transform days(40) translate OrbitLine1(clamp(clock*8, 0, 1)) }
-    object { Planet_2 transform days(20) translate OrbitLine2(clamp(clock*4, 0, 1)) }
-    object { Planet_3 transform days(10) translate OrbitLine3(clamp(clock*2, 0, 1)) }
+    object { Planet_1 transform days(1) translate OrbitLine1(clamp(clock*8, 0, 1)) }
+    object { Planet_2 transform days(1) translate OrbitLine2(clamp(clock*4, 0, 1)) }
+    object { Planet_3 transform days(1) translate OrbitLine3(clamp(clock*2, 0, 1)) }
 }
 
 union {
