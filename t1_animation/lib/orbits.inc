@@ -49,21 +49,22 @@
     natural_spline
     0.0000, vtransform(<0,0,0>,objTranslation(aRCam,bRCam,0))	, // control point
     0.0000, vtransform(<0,0,0>,objTranslation(aRCam,bRCam,0))	, // starting point
-    0.0625/4, vtransform(<0,0,0>,objTranslation(aRCam,bRCam,0.125)),
-    0.1250/4, vtransform(<0,0,0>,objTranslation(aRCam,bRCam,0.250)),
-    0.1875/4, vtransform(<0,0,0>,objTranslation(aRCam,bRCam,0.375)),
-    0.2500/4, vtransform(<0,0,0>,objTranslation(aRCam,bRCam,0.5))	,
-    0.3125/4, vtransform(<0,0,0>,objTranslation(aRCam,bRCam,0.625)),
-    0.3750/4, vtransform(<0,0,0>,objTranslation(aRCam,bRCam,0.75))	,
-    0.4375/4, vtransform(<0,0,0>,objTranslation(aRCam,bRCam,0.875)),
-    0.5000/4, vtransform(<0,0,0>,objTranslation(aRCam,bRCam,0))	, // end point....../// <0,0,1>
+    0.01563, vtransform(<0,0,0>,objTranslation(aRCam,bRCam,0.125)),
+    0.03125, vtransform(<0,0,0>,objTranslation(aRCam,bRCam,0.250)),
+    0.04688, vtransform(<0,0,0>,objTranslation(aRCam,bRCam,0.375)),
+    0.06250, vtransform(<0,0,0>,objTranslation(aRCam,bRCam,0.5))	,
+    0.07813, vtransform(<0,0,0>,objTranslation(aRCam,bRCam,0.625)),
+    0.09375, vtransform(<0,0,0>,objTranslation(aRCam,bRCam,0.75))	,
+    0.10938, vtransform(<0,0,0>,objTranslation(aRCam,bRCam,0.875)),
+    0.12500, vtransform(<0,0,0>,objTranslation(aRCam,bRCam,0))	, // end point....../// <0,0,1>
     //0.5625, <-0.2,0.2,1>,
     //0.6250, <-0.4,0.4,1>,
     //0.6875, <-0.6,0.6,1>,
     //0.7500, <-0.8,0.8,1>,
-    0.8125, <-1.5,1.5,1>,
+    //0.8125, <-1.5,1.5,1>,
+    0.5000, <-1.5,1.5,1>,
     //0.8750, <-1.2,1.2,0.8>,
     //0.9375, <-1.4,1.4,0.6>,
-    1.0000, <-2,2,0>,
-    1.0000, <-2,2,0>
+    1.0000, <0,0,1>,
+    1.0000, <0,0,1>
   }

@@ -39,23 +39,25 @@ camera {
     //location <5, Camera_Y,Camera_Z>
     //location <5, 30,-20>
 
-    //location <5, 5,-5>
+    //location <6, 6,-6>
     //look_at <0,0,0>//<2*sin((3*2)*orbitPoint),0,2*cos((3*2)*orbitPoint)>
 
     location camPos
     look_at OrbitLine1(clamp(clock*8, 0, 1))
 }
 
-light_source { <20, 20, -20> color White }
+//light_source { <20, 20, -20> color White }
 /*/ show the Positions
 object{ Marker(<0,1,0>, Red ) objTranslation(2,2,3,0)}
 object{ Marker(<0,1,0>, Red ) objTranslation(2,2,3,0.25)}
 object{ Marker(<0,1,0>, Red ) objTranslation(2,2,3,0.5)}
 object{ Marker(<0,1,0>, Red ) objTranslation(2,2,3,0.75)}
 */
-object{ DrawSPLine(OrbitLine1) }
-object{ DrawSPLine(OrbitLine2) }
-object{ DrawSPLine(OrbitLine3) }
+//object{ Marker(CamLine(0.500/4), Black )}
+//object{ Marker(CamLine(0.8125), Black )}
+//object{ DrawSPLine(OrbitLine1) }
+//object{ DrawSPLine(OrbitLine2) }
+//object{ DrawSPLine(OrbitLine3) }
 //object{ DrawSPLine(CamLine) }
 
 #declare lineLength = 50;
@@ -104,13 +106,13 @@ sky_sphere {
     }
 }
 // An infinite planar surface
-// plane {<A, B, C>, D } where: A*x + B*y + C*z = D
+/*/ plane {<A, B, C>, D } where: A*x + B*y + C*z = D
 plane {
   y, // <X Y Z> unit surface normal, vector points "away from surface"
   -5.0 // distance from the origin in the direction of the surface normal
   pigment {color rgb <0.5,0.5,0.5>}
 }
-//*/
+*/
 #declare Planet_1 =
 sphere { <0, 0, 0>, 0.5
   texture {
