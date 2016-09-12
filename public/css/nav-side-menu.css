@@ -77,6 +77,7 @@
 .nav-side-menu li a {
   text-decoration: none;
   color: #e1ffff;
+  display: block;
 }
 .nav-side-menu li a i {
   padding-left: 10px;
