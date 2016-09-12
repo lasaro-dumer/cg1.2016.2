@@ -16,6 +16,10 @@
 	$(document).ready(function(){
 		$('ul.menu-content li.collapsed a span').addClass('glyphicon glyphicon-chevron-down');
 		$('ul.sub-menu li a span').addClass('glyphicon glyphicon-chevron-right');
+		$('ul.sub-menu li a').click(function() {
+			$('ul.sub-menu li.active').removeClass('active');
+			$(this).parent().addClass('active');
+		});
 	});
 	</script>
 </head>
@@ -41,7 +45,7 @@
 					<a href="#"><i class="fa fa-gift fa-lg"></i>Projeto Animação<span></span></a>
 				</li>
 				<ul class="sub-menu collapse" id="products">
-					<li class="active"><a href="/Blog/animation/diary/inicio"><span></span>Inicio</a></li>
+					<li><a href="/Blog/animation/diary/inicio"><span></span>Inicio</a></li>
 					<li><a href="/Blog/animation/files"><span></span>Arquivos</a></li>
 				</ul>
 				<!--
