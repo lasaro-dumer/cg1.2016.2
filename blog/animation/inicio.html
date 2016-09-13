@@ -5,3 +5,13 @@
 <p>
     Apesar de encontrarmos ferramentas de qualidade e resultados bem satisfatórios, procuramos um método mais offline e acabamos aprendendo a gerar gifs no PhotoShop instalado nas máquinas do laborátrio.
 </p>
+<h3>Criação de uma cena(<i>scene</i>) própria</h3>
+<p>
+    Para melhor manipulação dos objetos e um entendimento completo de como funciona uma cena do POV-Ray, foi criada uma cena original. Ela representará um pequeno sistema solar, contendo um objeto para representar uma estrela que será a fonte de luz na cena, e alguns planetas que a orbitarão.
+</p>
+<p>
+    Após um pouco de pesquisa matemática e do funcionamento do POV-Ray conseguiu-se chegar a fórmula abaixo (que representa um vetor de transformação), que será usada para fazer os planetas se movimentarem em suas devidas órbitas através de transformações geométricas. Para a aplicação correta da fórmula é nescessário que o objeto em questão tenha como centro a origem dos eixos, ou seja, o vetor <code>&lt;0,0,0&gt;</code>.
+</p>
+<pre>
+    &lt;<var>majorR</var>*sin(2*<var>speed</var>*pi*<var>orbitPoint</var>),0,<var>minorR</var>*cos(2*<var>speed</var>*pi*<var>orbitPoint</var>)&gt;
+</pre>
