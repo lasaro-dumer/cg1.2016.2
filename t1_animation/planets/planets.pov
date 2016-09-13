@@ -12,53 +12,38 @@
 #include "woods.inc"
 #include "marker.inc"
 #include "orbits.inc"
+#include "skyb.inc"
 
 global_settings {max_trace_level 5}
 
-#declare Zoom_Start  = 0.5;
-#declare Zomm_Dist = 15;
-#declare camTime = clock-Zoom_Start;
 #declare turbMod = abs(cos(pi*clock));
-#if (clock < Zoom_Start )
-    #declare Camera_Y = 15.00;
-    #declare Camera_Z = -5.00;
-#else
-    #declare Camera_Y = 15.00  + Zomm_Dist * 0.5*(1-cos(4*pi*(camTime)));
-    #declare Camera_Z = -5.00 - Zomm_Dist * 0.5*(1-cos(4*pi*(camTime)));
-#end
+#declare useNebula1 = false;
+#declare release = true;
 
 #if (clock <= 0.125)
     #declare camPos = CamLine(clamp(clock,0,0.125));
-    //object{ Tracker(camPos, Red )  }
-    ////object{ Tracker(CamLine(clock*4), Red )  }
+    #declare trkrColor = Red;
 #else
     #declare camPos = CamLine(clock);
-    //object{ Tracker(camPos, Blue )  }
+    #declare trkrColor = Blue;
 #end
-camera {
-    //location <5, Camera_Y,Camera_Z>
-    //location <5, 30,-20>
-
-    //location <6, 6,-6>
-    //look_at <0,0,0>//<2*sin((3*2)*orbitPoint),0,2*cos((3*2)*orbitPoint)>
-
-    location camPos
-    look_at OrbitLine1(clamp(clock*8, 0, 1))
-}
-
-//light_source { <20, 20, -20> color White }
-/*/ show the Positions
-object{ Marker(<0,1,0>, Red ) objTranslation(2,2,3,0)}
-object{ Marker(<0,1,0>, Red ) objTranslation(2,2,3,0.25)}
-object{ Marker(<0,1,0>, Red ) objTranslation(2,2,3,0.5)}
-object{ Marker(<0,1,0>, Red ) objTranslation(2,2,3,0.75)}
-*/
-//object{ Marker(CamLine(0.500/4), Black )}
-//object{ Marker(CamLine(0.8125), Black )}
-//object{ DrawSPLine(OrbitLine1) }
-//object{ DrawSPLine(OrbitLine2) }
-//object{ DrawSPLine(OrbitLine3) }
-//object{ DrawSPLine(CamLine) }
+#if (release = false)
+    camera {
+        location <6, 6,-6>
+        look_at <0,0,0>//<2*sin((3*2)*orbitPoint),0,2*cos((3*2)*orbitPoint)>
+    }
+    object{ Tracker(camPos, trkrColor )  }
+    light_source { <20, 20, -20> color White }
+    object{ DrawSPLine(OrbitLine1) }
+    object{ DrawSPLine(OrbitLine2) }
+    object{ DrawSPLine(OrbitLine3) }
+    object{ DrawSPLine(CamLine) }
+#else
+    camera {
+        location camPos
+        look_at OrbitLine1(clamp(clock*8, 0, 1))
+    }
+#end
 
 #declare lineLength = 50;
 #declare xLine = cylinder { <0.01,0,0> <1,0,0> 0.01 pigment { color Red} };
@@ -97,14 +82,18 @@ sphere{ <0,0,0>, 1
         scale 10000
       } //end of sphere ---------------
 */
-sky_sphere {
-    pigment {
-        gradient y
-        color_map {
-            [0, 1  color Black color Black]
+#if (useNebula1 = false)
+    sky_sphere {
+        pigment {
+            gradient y
+            color_map {
+                [0, 1  color Black color Black]
+            }
         }
     }
-}
+#else
+    nebulaOne(clock)
+#end
 // An infinite planar surface
 /*/ plane {<A, B, C>, D } where: A*x + B*y + C*z = D
 plane {
