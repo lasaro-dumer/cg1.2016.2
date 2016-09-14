@@ -1,0 +1,82 @@
+<h3>Texturas</h3>
+<p>
+    As texturas no POV-Ray nada mais são do que cores e/ou padrões de cores, que podem sofrer alterações de finalização, superficie e outras propriedades mais especificas. Abaixo possuimos um exemplo que código que exeplora um pouco sobre texturas, uma imagem e um exemplo de animação utilizando este código.
+</p>
+<pre>
+#include "colors.inc"
+#declare turbMod = abs(cos(pi*clock));
+
+camera {
+    location &lt;5, 5, -6&gt;
+    look_at &lt;0, 0, 0&gt;
+}
+light_source { &lt;20, 20, -20&gt; color White }
+plane {
+    y, 0
+    pigment { checker color White color Black }
+}
+sphere {
+    &lt;0, 0, 0&gt; , 1
+    texture {
+        pigment { color Yellow }
+        normal { bumps 0.4 scale 0.2 }
+        finish { phong 1 }
+        rotate &lt;0, -clock*360,0&gt;
+    }
+    rotate &lt;0, -clock*360,0&gt;
+    translate &lt;-pi, 1, 0&gt;
+}
+
+sphere {
+    &lt;0, 0, 0&gt; , 1
+    texture {
+        pigment {
+            wood
+            color_map {
+                [0.0 color Red]
+                [0.5 color Red]
+                [0.5 color Blue]
+                [1.0 color Blue]
+            }
+            scale &lt;0.2, 0.3, 1&gt;
+        }
+        finish { phong 1 }
+        rotate &lt;0, -clock*360,0&gt;
+    }
+    rotate &lt;0, -clock*360,0&gt;
+    translate &lt;0, 1, 0&gt;
+}
+
+sphere {
+    &lt;0, 0, 0&gt; , 1
+    texture {
+        pigment {
+            gradient y
+            colour_map {
+                [0.00, Red]
+                [0.10, Yellow]
+                [0.20, Red]
+                [0.30, Yellow]
+                [0.40, Red]
+                [0.50, Yellow]
+                [0.60, Red]
+                [0.70, Yellow]
+                [0.80, Red]
+                [0.90, Yellow]
+                [1.00, Red]
+            }
+            turbulence turbMod
+            scale &lt;1, 1, 1&gt;
+        }
+        normal { bumps 0.4 scale 0.2 }
+        finish { phong 1 }
+        rotate &lt;0, -clock*360,0&gt;
+    }
+    rotate &lt;0, -clock*360,0&gt;
+    translate &lt;pi, 1, 0&gt;
+}
+</pre>
+<img src="exem_texturas" alt="" />
+<video src="exem_texturas" autoplay loop="true">
+
+</video>
