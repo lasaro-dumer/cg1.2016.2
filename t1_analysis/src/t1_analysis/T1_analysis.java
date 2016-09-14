@@ -12,14 +12,17 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javafx.beans.property.MapProperty;
 
 /**
  *
@@ -33,55 +36,65 @@ public class T1_analysis {
     public static void main(String[] args) {
         FileReader fr = null;
         try {
-            System.out.println("Hello World!");
-            Map<String,Pessoa> pessoas = new HashMap<String,Pessoa>();
+            if(args.length == 0)
+                throw new Exception("Please provide a filename");
+            Map<String,Person> people = new HashMap<String,Person>();
             String fileName = args[0];
 
             fr = new FileReader(new File(fileName));
             BufferedReader br = new BufferedReader(fr);
             StringTokenizer st;
-            String linha = br.readLine();
+            String line = br.readLine();
             int ln = 0;
-            int pxlsPorMetro = 0;
-            while (linha != null) {
-                linha = linha.toLowerCase();
+            int pxlsPerMeter = 0;
+            System.out.println("Parsing file...");
+            while (line != null) {
+                line = line.toLowerCase();
                 if (ln == 0) {
-                    pxlsPorMetro = getPixelsPorMetro(linha);
-                    System.out.println("Pixels por metro: "+pxlsPorMetro);
+                    pxlsPerMeter = getPixelsPerMeter(line);
+                    System.out.println("Pixels per meter: "+pxlsPerMeter);
                 } else {
-                    List<CordElement> elms = getElementsFromLine(linha);                    
-                    Pessoa p = new Pessoa();
-                    p.nome = "Pessoa_"+ln;
-                    p.posicoes = elms;
-                    pessoas.put(p.nome,p);
+                    Map<Integer, CordElement> elms = getElementsFromLine(line);                    
+                    Person p = new Person();
+                    p.name = "Person_"+ln;
+                    p.positions = elms;
+                    people.put(p.name,p);
                 }
-                linha = br.readLine();
+                line = br.readLine();
                 ln++;
             }
             br.close();
+            System.out.println("Parse complete");
             
-            for (Map.Entry<String, Pessoa> entry : pessoas.entrySet()) {
-                String nome = entry.getKey();
-                Pessoa pessoa = entry.getValue();
+            System.out.println("Searching events...");
+            DetectEvents detector = new DetectEvents(people, pxlsPerMeter,50);
+            detector.detectEncounters();
+            String results = detector.printResults();
+            
+            System.out.println("Events found:");
+            System.out.println(results);
+            
+            System.out.println("People in scene:");
+            for (Map.Entry<String, Person> entry : people.entrySet()) {
+                String name = entry.getKey();
+                Person person = entry.getValue();
                 //System.out.print("["+nome+"]:");
-                System.out.println(pessoa);
-            }
-            
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(T1_analysis.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
+                System.out.println(person);
+            }            
+        } catch (Exception ex) {
             Logger.getLogger(T1_analysis.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             try {
-                fr.close();
-            } catch (IOException ex) {
+                if(fr!=null)
+                    fr.close();
+            } catch (Exception ex) {
                 Logger.getLogger(T1_analysis.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
 
-    private static List<CordElement> getElementsFromLine(String linha) {
-        List<CordElement> elements = new ArrayList<>();
+    private static Map<Integer,CordElement> getElementsFromLine(String linha) {
+        Map<Integer,CordElement> elements = new HashMap<>();
         //count elementos
         String ct = "(?<CNT>\\d*+\\s*+)";
         //elemento da linha
@@ -94,24 +107,24 @@ public class T1_analysis {
                 ce.X = Integer.parseInt(split.group("X"));
                 ce.Y = Integer.parseInt(split.group("Y"));
                 ce.T = Integer.parseInt(split.group("T"));
-                elements.add(ce);
+                elements.put(ce.T, ce);
             }
         }
-
+        
         return elements;
     }
 
-    private static int getPixelsPorMetro(String linha) {
+    private static int getPixelsPerMeter(String line) {
         //pixels por metro :   [0-9]+
         String el = "(?<PXL>\\[(?<D>\\d+)\\])";
         Pattern p = Pattern.compile(el);
-        Matcher split = p.matcher(linha);
+        Matcher split = p.matcher(line);
         while (split.find()) {
             if (split.group("PXL").length() > 0) {
                 return Integer.parseInt(split.group("D"));
             }
         }
-        throw new InvalidParameterException("A linha não está no formato adequado."); //To change body of generated methods, choose Tools | Templates.
+        throw new InvalidParameterException("The line isn't in an acceptable format."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

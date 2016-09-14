@@ -1,3 +1,14 @@
+function resizeByParent(selector){
+	var pW = $(selector).parent().width();
+	var iW = $(selector).width();
+	var iH = $(selector).height();
+	var pr = (iW/pW);
+	var newW = iW/pr;
+	var newH = iH/pr;
+	$(selector).width(newW);
+	$(selector).height(newH);	
+}
+
 var app = angular.module('cg1App', ['ngRoute']);
 
 app.controller('cg1Controller', function($scope, $route, $routeParams, $location) {
@@ -8,6 +19,12 @@ app.controller('cg1Controller', function($scope, $route, $routeParams, $location
     .controller('ProjectController', function($scope, $routeParams) {
         $scope.name = 'ProjectController';
         $scope.params = $routeParams;
+		console.log('ProjectController');
+		resizeByParent('video');
+		$('img.preview-pov').on('load',function() {
+			console.log('onload');
+			resizeByParent('img.preview-pov');
+		});
     })
     .config(function($routeProvider, $locationProvider) {
         $routeProvider

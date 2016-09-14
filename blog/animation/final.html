@@ -1,0 +1,75 @@
+<h3>Cena final</h3>
+<p>
+	Para a cena final foram criados 3 planetas, com texturas e orbitas unicas (usando SPLines), e uma estrela com textura de gradiente modificada pelo <code>clock</code>. A camera utiliza uma SPLine para se movimentar, e no inicio acompanha o primeiro planeta, depois faz um movimento um pouco inclinado se elevando no eixo <var>y</var>. Existe tambem uma versão da cena com uma <var>skybox</var> que simula uma nebula. Para melhor vizualisação das SPLines e texturas cada cena tambem conta com uma verão de <code>'debug'</code> e foram geradas com 360 frames no total e 15 frames por segundo, totalizando 24 segundos.
+</p>
+<div style="width:100%;height:100%;">
+	<h4>Primeira versão, sem nebula</h4>
+	<h5>Debug</h5>
+	<a class="btn btn-primary" role="button" href="https://github.com/lasaro-dumer/cg1.2016.2/releases/download/v0.0.2/planets_24s_15fps_b.mp4">
+		<span class="glyphicon glyphicon-download"></span>
+		Baixar esta versão
+	</a>
+	<button class="btn btn-primary" type="button" 
+		data-toggle="collapse" data-target="#v1debug">
+	  Preview
+	</button>
+	<div class="collapse" id="v1debug">
+		<video loop autoplay="" name="media">
+			<source src="https://github.com/lasaro-dumer/cg1.2016.2/releases/download/v0.0.2/planets_24s_15fps_b.mp4" type="video/mp4">
+		</video>
+	</div>
+	<h5>Final</h5>
+	<a  class="btn btn-primary" role="button" href="https://github.com/lasaro-dumer/cg1.2016.2/releases/download/v0.0.2/planets_24s_15fps_final.mp4">
+		<span class="glyphicon glyphicon-download"></span>
+		Baixar esta versão
+	</a>
+	<button class="btn btn-primary" type="button" 
+		data-toggle="collapse" data-target="#v1final">
+	  Preview
+	</button>
+	<div class="collapse" id="v1final">
+		<video loop autoplay="" name="media">
+			<source src="https://github.com/lasaro-dumer/cg1.2016.2/releases/download/v0.0.2/planets_24s_15fps_final.mp4" type="video/mp4">
+		</video>
+	</div>
+	<h4>Segunda versão, com nebula</h4>
+	<h5>Debug</h5>
+	<a  class="btn btn-primary" role="button" href="https://github.com/lasaro-dumer/cg1.2016.2/releases/download/v0.0.3/planets_nebula_1_track.mp4">
+		<span class="glyphicon glyphicon-download"></span>
+		Baixar esta versão
+	</a>
+	<button class="btn btn-primary" type="button" 
+		data-toggle="collapse" data-target="#v2debug">
+	  Preview
+	</button>
+	<div class="collapse" id="v2debug">
+		<video loop autoplay="" name="media">
+			<source src="https://github.com/lasaro-dumer/cg1.2016.2/releases/download/v0.0.3/planets_nebula_1_track.mp4" type="video/mp4">
+		</video>
+	</div>
+	<h5>Final</h5>
+	<a  class="btn btn-primary" role="button" href="https://github.com/lasaro-dumer/cg1.2016.2/releases/download/v0.0.3/planets_nebula_1_cam.mp4">
+		<span class="glyphicon glyphicon-download"></span>
+		Baixar esta versão
+	</a>
+	<button class="btn btn-primary" type="button" 
+		data-toggle="collapse" data-target="#v2final">
+	  Preview
+	</button>
+	<div class="collapse" id="v2final">
+		<video loop autoplay="" name="media">
+			<source src="https://github.com/lasaro-dumer/cg1.2016.2/releases/download/v0.0.3/planets_nebula_1_cam.mp4" type="video/mp4">
+		</video>
+	</div>
+</div>
+
+<h4>Código fonte</h4>
+Para gerar as imagens acima foi usado o código fonte no link abaixo. Para gerar as diferentes versões é só alterar as variáveis abaixo.
+<pre>
+#declare useNebula1 = false;
+#declare release = true;
+</pre>
+<a class="btn btn-primary" role="button" href="https://github.com/lasaro-dumer/cg1.2016.2/releases/download/v0.0.3/planets.zip">
+	<span class="glyphicon glyphicon-download"></span>
+	Baixar código fonte
+</a>

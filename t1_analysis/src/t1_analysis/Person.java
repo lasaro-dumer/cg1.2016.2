@@ -5,18 +5,18 @@
  */
 package t1_analysis;
 
-import java.util.List;
+import java.util.Map;
 
 /**
  *
  * @author lasaro
  */
-public class Pessoa {
-    public String nome;
-    public List<CordElement> posicoes;
+public class Person {
+    public String name;
+    public Map<Integer,CordElement> positions;
 
     @Override
     public String toString() {
-        return nome + ", movimentos: " + posicoes.size();
+        return name + ", move count: " + positions.size();
     }
 }
