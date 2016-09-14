@@ -1,0 +1,61 @@
+<h3>Trabalhando com SPLines</h3>
+<p>
+    Como uma maneira de melhorar e visualizar melhor as trajetórias dos objetos e da camera, descobrimos as SPLines em nossas pesquisas. SPLines no POV-Ray são linhas que são criadas e passam por pontos pré determinados. Apóes uma SPLine ser criada é só usa-la
+    como uma função, onde o unico argumento é uma posição da linha, que é data entre 0 e 1, e o retorno será um conjunto de coordenadas 3D em dada posição da linha SPLine. Usando os ponto pré determinado a SPLine poderá usar um dos métodos a seguir para
+    projetar o pontos intermediários:
+    <ul>
+        <li><b>linear_spline:</b> Linhas retas conectam os pontos ancora (Padrão)</li>
+        <li><b>quadratic_spline:</b> Uma linha quadrática suave conecta os pontos ancora</li>
+        <li><b>cubic_spline:</b> Uma linha cubica mais suave conecta os pontos ancora</li>
+        <li><b>natural_spline:</b> Uma linha cubica mais suave ainda conecta os pontos ancora</li>
+    </ul>
+
+    Um exemplo de SPLine pode ser observado abaixo, junto com um laço para desenha-la e um objeto em no ponto inicial da linha.
+    <pre>
+#declare P1 = &lt;-2.00, 0.20, -2.00&gt;;
+#declare P2 = &lt; 1.00, 0.20, -2.00&gt;;
+#declare P3 = &lt; 2.00, 0.70, -1.00&gt;;
+#declare P4 = &lt; 2.00, 1.20,  2.00&gt;;
+#declare P5 = &lt; 0.00, 0.20,  2.00&gt;;
+#declare P6 = &lt;-2.00, 3.20,  1.50&gt;;
+#declare P7 = &lt;-2.00, 0.70, -1.00&gt;;
+#declare P8 = &lt;-2.00, 0.00, -2.00&gt;;
+
+#declare Spline_1 =
+spline {
+    natural_spline
+    -0.250, P7, // ponto de controle
+    0.000, P1, //ponto inicial
+    0.125, P2,
+    0.250, P3,
+    0.420, P4,
+    0.490, P5,
+    0.780, P6,
+    0.900, P7,
+    1.000, P1, //ponto final
+    1.125, P2  //ponto de controle
+}
+
+union{
+    #declare Nr = 0;
+    #declare EndNr = 1;
+    #while (Nr&lt; EndNr)
+        sphere{ &lt;0,0,0&gt;,0.07 scale&lt;1,1,1&gt;
+            texture{ pigment{color rgb &lt;1-Nr/2,0.75+Nr/4,0&gt;} finish {ambient 0.15 diffuse 0.85 phong 1} }
+            translate Spline_1(Nr)
+        }
+        #declare Nr = Nr + 0.0005;
+    #end
+    rotate&lt;0,0,0&gt;
+    translate&lt;0,0,0&gt;
+}
+sphere{ &lt;0,0,0&gt;, 0.25
+    texture{ pigment{ color Blue} finish { diffuse 0.9 phong 1} }
+    translate Spline_1(clock)
+}
+    </pre>
+</p>
+<p>
+    O exemplo acima, com algumas adições de luz e camera, ira renderizar na imagem abaixo, com a SPLine com um leve degrade de amarelo para verde e uma esfera azul no inicio.
+</p>
+<img src="exem_SPLine" alt="" />

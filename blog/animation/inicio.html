@@ -15,3 +15,32 @@
 <pre>
     &lt;<var>majorR</var>*sin(2*<var>speed</var>*pi*<var>orbitPoint</var>),0,<var>minorR</var>*cos(2*<var>speed</var>*pi*<var>orbitPoint</var>)&gt;
 </pre>
+<p>
+    Onde:
+    <ul>
+        <li><b>majorR:</b> raio maior</li>
+        <li><b>minorR:</b> raio menor, é igual ao raio maior em circulos</li>
+        <li><b>orbitPoint:</b> ponto da orbita/circunferência, pode ir de 0 até 1, ou seja, do inicio ao final da circunferência</li>
+        <li><b>speed:</b> velocidade a ser considerada na movimentação</li>
+    </ul>
+</p>
+<p>
+    A fórmula acima deve ser aplicada para cada planeta na cena, cada um com sua orbita definida pelas variavéis de raio, e o <code>orbitPoint</code> será substituido pela variável <code>clock</code> do POV-Ray. Se colocarmos a formula dentro de um <code>#macro</code> e usarmos este para manipular um planeta, teriamos o seguinte código:
+    <pre>
+#macro objTranslation(majorR,minorR,speed,orbitPoint)
+  transform { translate &lt;majorR*sin(2*speed*pi*orbitPoint),0,minorR*cos(2*speed*pi*orbitPoint)&gt; }
+#end
+
+#declare Planet_1 =
+sphere { &lt;0, 0, 0&gt;, 0.5
+  texture {
+    pigment{ color rgb &lt;0.55,0.45,0.3&gt;}
+    normal { granite 1.5  scale 1}
+  }
+}
+
+union {
+    object { Planet_1 translate objTranslation(2,2,8,clock) }
+}
+    </pre>
+</p>
