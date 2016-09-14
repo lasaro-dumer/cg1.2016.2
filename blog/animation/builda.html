@@ -1,0 +1,136 @@
+<h3>Animação com ffmpeg</h3>
+<p>
+    Como uma maneira de gerar uma animação de forma mais automática, sem o uso de editores de imagem como Photoshop ou video como Movie Maker, descobrimos o ffmpeg, que é uma biblioteca multiplataforma para <i>encoding</i> de video. Com isto é possível gerar <i>GIFs</i> ou videos somente com uma linha de comando usando as imagens geradas pelo POV-Ray.
+</p>
+<h3>Build</h3>
+<p>
+    Para automatizar o processo de animação criamos os arquivos de buils a seguir. No Windows não é possivel utilizar o POV-Ray por linha de comando devido a restrições técnicas da ferramenta, por isto a build neste sistema operacional só possui a utilização do ffmpeg. No linux a build é mais avançada, já que podemos utilizar o POV-Ray na linha de comando.
+</p>
+<h4>Build Windows</h4>
+<p>
+    A build no Windows possui os sequintes parametros e código:
+    <ol>
+        <li>diretório dos arquivos de imagem</li>
+        <li>nome padrão dos arquivos de imagem (somente o radical do nome sem os digitos e extensão)</li>
+        <li>diretório de saida</li>
+    </ol>
+</p>
+    <pre>
+set IDIR=%1
+set BASE=%IDIR%/%2
+set OUT=%3/%2
+ffmpeg -f image2 -framerate 30 -i %BASE%%%02d.png %OUT%.gif -y
+    </pre>
+<p>
+    Exemplo de utilização:
+    <pre>
+makeGif.bat planets planets gifs
+    </pre>
+    Importante resaltar tambem que a extenção de saida e framerates estão fixos neste caso
+</p>
+<h4>Build  Linux</h4>
+<p>
+    A build para Linux é mais avançada, podendo modificar várias opções da animação, desde suas dimensões até a quantidade de frames total e por segundo. Os paarmetros esperados são os seguintes (obrigatórios estão sublinhados):
+    <ul>
+        <li><b><u>-p {arquivo}</u></b> é o nome do arquivo .INI do POV-Ray a ser renderizado</li>
+        <li><b><u>-i {caminho}</u></b> é o diretório onde está o aruiqvo do POV-Ray e é onde ele irá gerar as imagens</li>
+        <li><b><u>-o {caminho}</u></b> é o diretório onde a animação será salva</li>
+        <li><b>-w {número}</b> é a largura em pixels das imagens e animação</li>
+        <li><b>-h {número}</b> é a altura em pixels das imagens e animação</li>
+        <li><b>-f {número}</b> total de frames da animação, de 1 até 999 (1=sem animação, renderização normal do POV-Ray)</li>
+        <li><b>-s {número}</b> frames por segundo na animação</li>
+        <li><b>-k t</b> não deleta imagens de saida do POV-Ray após execução</li>
+        <li><b>-g t</b> animação de saída será um GIF, por padrão é um MP4</li>
+    </ul>
+    O código do script de build segue abaixo:
+</p>
+<pre>
+#!/bin/bash
+W=1024
+H=768
+FPS=30
+IDIR=""
+DIG=2
+KEEP=false
+GIF=false
+while getopts ":p:i:o:w:h:f:s:k:g:" opt; do
+  case $opt in
+    p) POVFile="$OPTARG"
+    ;;
+    i) IDIR="$OPTARG"
+    ;;
+    o) ODIR="$OPTARG"
+    ;;
+    w) W="$OPTARG"
+    ;;
+    h) H="$OPTARG"
+    ;;
+    f) KFF="$OPTARG"
+    ;;
+    s) FPS="$OPTARG"
+    ;;
+    k) KEEP=true
+    ;;
+    g) GIF=true
+    ;;
+    \?) echo "Invalid option -$OPTARG" &gt;&amp;2
+    ;;
+  esac
+done
+if [ -z "$IDIR" ]; then
+    echo Specify an input dir with '-i'
+    exit
+fi
+if [ -z "$ODIR" ]; then
+    echo Specify an output dir with '-o'
+    exit
+fi
+if [ -z "$POVFile" ]; then
+    echo Specify the .INI/.pov file name with '-p' \(without extension\)
+    exit
+fi
+BASE=$IDIR/$POVFile
+printf "Input dir is %s\n" "$IDIR"
+printf "Output dir is %s\n" "$arg_1"
+echo FPS is $FPS
+echo width=$W height=$H
+workdir=${PWD}          # to assign to a variable
+
+rm -rf $BASE*.png
+if [ -z "$KFF" ]; then
+  povray $BASE.ini +I$BASE.pov +FN +O$BASE +W$W +H$H -GA -V -WL0 +L$workdir/lib +L$workdir
+else
+  echo Final frame is $KFF
+  if [[ "$KFF" -eq 1 ]]; then
+    povray $BASE.ini +I$BASE.pov +FN +O$BASE +P +W$W +H$H +KFF$KFF -GA -V -WL0 +L$workdir/lib +L$workdir
+    exit
+  elif [[ "$KFF" -lt 10 ]]; then
+    DIG=1
+  elif [[ "$KFF" -lt 100 ]]; then
+    DIG=2
+  elif [[ "$KFF" -lt 1000 ]]; then
+    DIG=3
+  else
+    echo Invalid max frames, the max is 999
+    exit
+  fi
+  povray $BASE.ini +I$BASE.pov +FN +O$BASE +W$W +H$H +KFF$KFF -GA -V -WL0 +L$workdir/lib +L$workdir
+fi
+
+if [[ "$GIF" == false ]]; then
+  ffmpeg -framerate $FPS -i $BASE%0"$DIG"d.png -s:v "$W"x"$H" $ODIR/$POVFile.mp4 -y
+else
+  ffmpeg -f image2 -framerate $FPS -i $BASE%0"$DIG"d.png $ODIR/$POVFile.gif -y
+fi
+
+if [[ "$KEEP" == false ]]; then
+  rm -rf $BASE*.png
+fi
+</pre>
+<p>
+    Exemplo de utilização:
+    <pre>
+./build.sh -i planets -o gifs -p planets -f 360 -s 15
+    </pre>
+</p>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>

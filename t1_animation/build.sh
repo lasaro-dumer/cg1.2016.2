@@ -77,5 +77,5 @@ else
 fi
 
 if [[ "$KEEP" == false ]]; then
-#  rm -rf $BASE*.png
+  rm -rf $BASE*.png
 fi
