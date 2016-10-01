@@ -16,7 +16,7 @@ void camera::setPerspective(GLint windowHeight,GLint windowWidth){
     glFrustum(-fW, fW, -fH, fH, near, far);
 }
 
-void camera::rotate(int vertMovement,int horizMovement){
+void camera::rotate(double vertMovement,double horizMovement){
     this->camXRot += vertMovement / this->vertMouseSensitivity;
     this->camYRot += horizMovement / this->horizMouseSensitivity;
 
@@ -93,6 +93,18 @@ void camera::calculateCameraMovement()
         camMovementXComponent += this->speedFactor * float(cos(yRotRad));
         camMovementZComponent += this->speedFactor * float(sin(yRotRad));
     }
+
+    if(this->moveUp)
+    {
+        float zRotRad = toRads(this->camZRot);
+        camMovementYComponent += this->speedFactor * float(cos(zRotRad));
+    }
+
+    if(this->moveDown)
+    {
+        float zRotRad = toRads(this->camZRot);
+        camMovementYComponent += this->speedFactor * float(cos(zRotRad)) * -1.0f;
+    }
     // After combining our movements for any & all keys pressed, assign them to our camera speed along the given axis
     this->camXSpeed = camMovementXComponent;
     this->camYSpeed = camMovementYComponent;
@@ -126,5 +138,5 @@ void camera::move()
 }
 
 camera::~camera(){
-    
+
 }

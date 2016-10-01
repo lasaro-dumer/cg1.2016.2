@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include <GLee.h>         // No need to link to GL/gl.h
-#include <GL/glfw.h>      // Include OpenGL Framework library
+#include <GLFW/glfw3.h>      // Include OpenGL Framework library
 #include <GL/freeglut.h>  // Include FreeGLUT so we can easily draw spheres and calculate our viewing frustrum
 #include <math.h>         // Used only for sin() and cos() functions
 #include "camera.hpp"
@@ -10,9 +10,16 @@ using namespace std;
 
 GLint windowWidth  = 800;                    // Width of our window
 GLint windowHeight = 600;                    // Heightof our window
+GLint oldWindowWidth,oldWindowHeight;
+GLint windowPosX   = 50;      // Windowed mode's top-left corner x
+GLint windowPosY   = 50;      // Windowed mode's top-left corner y
 
 GLint midWindowX = windowWidth  / 2;         // Middle of the window horizontally
 GLint midWindowY = windowHeight / 2;         // Middle of the window vertically
+
+bool fullScreenMode = false;
+
+GLFWwindow* gameWindow;
 
 // Location of the sun (i.e. how far deep into the screen is it?)
 GLfloat sunZLocation = -300.0f;
@@ -33,6 +40,7 @@ GLfloat vertMouseSensitivity  = 10.0f;
 GLfloat horizMouseSensitivity = 10.0f;
 camera cameraFPS(vertMouseSensitivity,horizMouseSensitivity,movementSpeedFactor);
 
+char windowTitle[] = "Space Mission 3: Lost in Space";
 
 // Function to check if OpenGL is having issues - pass it a unique string of some kind to track down where in the code it's moaning
 void checkGLError(const char * errorLocation)
@@ -55,16 +63,37 @@ void checkGLError(const char * errorLocation)
     }
 }
 
+void setFullScreen(bool toFullScreen) {
+    if(fullScreenMode == toFullScreen)
+        return;
+    fullScreenMode = toFullScreen;
+
+    glfwGetWindowPos(gameWindow, &windowPosX, &windowPosY);
+    GLFWmonitor* monitor = NULL;
+    if (fullScreenMode) {                     // Full-screen mode
+        monitor = glfwGetPrimaryMonitor();
+        const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+        oldWindowWidth = windowWidth;
+        oldWindowHeight = windowHeight;
+        windowWidth = mode->width;
+        windowHeight = mode->height;
+    } else {                                         // Windowed mode
+        windowWidth = oldWindowWidth;
+        windowHeight = oldWindowHeight;
+    }
+    glfwSetWindowMonitor(gameWindow,monitor,windowPosX,windowPosY,windowWidth,windowHeight,GLFW_DONT_CARE);
+    glfwSetWindowSize(gameWindow,windowWidth,windowHeight);
+    glViewport(0, 0, (GLsizei)windowWidth, (GLsizei)windowHeight);
+    cameraFPS.setPerspective(windowHeight,windowWidth);
+}
+
 void initGame()
 {
     // ----- GLFW Settings -----
-    glfwDisable(GLFW_MOUSE_CURSOR); // Hide the mouse cursor
+    glfwSetInputMode(gameWindow,GLFW_CURSOR,GLFW_CURSOR_DISABLED); // Hide the mouse cursor
     // ----- Window and Projection Settings -----
-    // Set the window title
-    glfwSetWindowTitle("Space Mission 3: Lost in Space");
     // Setup our viewport to be the entire size of the window
     glViewport(0, 0, (GLsizei)windowWidth, (GLsizei)windowHeight);
-
     cameraFPS.setPerspective(windowHeight,windowWidth);
 
     glMatrixMode(GL_MODELVIEW);
@@ -112,40 +141,51 @@ void initGame()
 }
 
 // Function to deal with mouse position changes, called whenever the mouse cursorm moves
-void handleMouseMove(int mouseX, int mouseY)
+void handleMouseMove(GLFWwindow* window, double mouseX, double mouseY)
 {
-    int horizMovement = mouseX - midWindowX;
-    int vertMovement  = mouseY - midWindowY;
+    double horizMovement = mouseX - midWindowX;
+    double vertMovement  = mouseY - midWindowY;
     cameraFPS.rotate(vertMovement,horizMovement);
     // Reset the mouse position to the centre of the window each frame
-    glfwSetMousePos(midWindowX, midWindowY);
+    glfwSetCursorPos(gameWindow, midWindowX, midWindowY);
 }
 
-
 // Function to set flags according to which keys are pressed or released
-void handleKeypress(int theKey, int theAction)
+void handleKeypress(GLFWwindow* window, int theKey, int scancode, int theAction, int mods)
 {
     // If a key is pressed, toggle the relevant key-press flag
-    if (theAction == GLFW_PRESS)
+    if (theAction == GLFW_PRESS || theAction == GLFW_REPEAT)
     {
         switch(theKey)
         {
-            case 'W':   cameraFPS.setMoveForward(true);      break;
-            case 'S':   cameraFPS.setMoveBackward(true);     break;
-            case 'A':   cameraFPS.setMoveLeft(true);   break;
-            case 'D':   cameraFPS.setMoveRight(true);  break;
-            default:    /*Do nothing...*/           break;
+            case GLFW_KEY_W:            cameraFPS.setMoveForward(true);     break;
+            case GLFW_KEY_S:            cameraFPS.setMoveBackward(true);    break;
+            case GLFW_KEY_A:            cameraFPS.setMoveLeft(true);        break;
+            case GLFW_KEY_D:            cameraFPS.setMoveRight(true);       break;
+            case GLFW_KEY_SPACE:        cameraFPS.setMoveUp(true);          break;
+            case GLFW_KEY_LEFT_SHIFT:   cameraFPS.setMoveDown(true);        break;
+            case GLFW_KEY_F1:           setFullScreen(!fullScreenMode);     break;
+            case GLFW_KEY_ESCAPE:       glfwSetWindowShouldClose(window, true); break;
+            default:
+                /*Do nothing...*/
+                std::cout << "PRE KEY: " << theKey << std::endl;
+                break;
         }
     }
     else // If a key is released, toggle the relevant key-release flag
     {
         switch(theKey)
         {
-            case 'W':   cameraFPS.setMoveForward(false);     break;
-            case 'S':   cameraFPS.setMoveBackward(false);    break;
-            case 'A':   cameraFPS.setMoveLeft(false);  break;
-            case 'D':   cameraFPS.setMoveRight(false); break;
-            default:    /* Do nothing...*/          break;
+            case GLFW_KEY_W:            cameraFPS.setMoveForward(false);    break;
+            case GLFW_KEY_S:            cameraFPS.setMoveBackward(false);   break;
+            case GLFW_KEY_A:            cameraFPS.setMoveLeft(false);       break;
+            case GLFW_KEY_D:            cameraFPS.setMoveRight(false);      break;
+            case GLFW_KEY_SPACE:        cameraFPS.setMoveUp(false);          break;
+            case GLFW_KEY_LEFT_SHIFT:   cameraFPS.setMoveDown(false);        break;
+            default:
+                /*Do nothing...*/
+                std::cout << "REL KEY: " << theKey << std::endl;
+                break;
         }
     }
 }
@@ -207,18 +247,13 @@ void drawScene()
     glLightfv(GL_LIGHT0, GL_POSITION, newLightPos);  // Place the light where the sun is!
 
     // ----- Stop Drawing Stuff! ------
-    glfwSwapBuffers(); // Swap the buffers to display the scene (so we don't have to watch it being drawn!)
+    glfwSwapBuffers(gameWindow); // Swap the buffers to display the scene (so we don't have to watch it being drawn!)
+    glfwPollEvents();
 }
 
 // Fire it up...
 int main(int argc, char **argv)
 {
-    // Frame counter and window settings variables
-    int	redBits    = 8, greenBits = 8,    blueBits    = 8;
-    int alphaBits  = 8, depthBits = 24,   stencilBits = 0;
-    // Flag to keep our main loop running
-    bool running = true;
-
     // ----- Intialiase FreeGLUT -----
     // Note: We're only using freeGLUT to draw some spheres, so if you modify the code to not include any calls
     // to glutSolidSphere, then you don't need this, the header or the lib...
@@ -227,15 +262,18 @@ int main(int argc, char **argv)
     glfwInit();
     // Ask for 4x AntiAliasing (this doesn't mean we'll get it - it'll work only if the GLX_ARB_multisample extension is available)
     // Note: Hints must be provided BEFORE the window is opened! But we can't query for it with GLEE until the window is opened! Catch 22!
-    glfwOpenWindowHint(GLFW_FSAA_SAMPLES, 4);
+    glfwWindowHint(GLFW_SAMPLES, 4);
 
     // Create a window
-    if(!glfwOpenWindow(windowWidth, windowHeight, redBits, greenBits, blueBits, alphaBits, depthBits, stencilBits, GLFW_WINDOW))
+    gameWindow = glfwCreateWindow(windowWidth,windowHeight,windowTitle, NULL, NULL);
+    if(gameWindow == NULL)
     {
         cout << "Failed to open window!" << endl;
         glfwTerminate();
         return 0;
     }
+    glfwMakeContextCurrent(gameWindow);
+    setFullScreen(fullScreenMode);// Will set viewport and camera perspective
     // ----- Initialise GLEE -----
     // Initialise GLee once we've got a rendering context
     // Note: We don't really have to do this because it's called automatically, but if we do it - we KNOW it's been called!
@@ -253,15 +291,15 @@ int main(int argc, char **argv)
         glEnable(GL_LINE_SMOOTH);
 
     // Set the mouse cursor to the centre of our window
-    glfwSetMousePos(midWindowX, midWindowY);
+    glfwSetCursorPos(gameWindow,midWindowX, midWindowY);
     // Call our initGame function to set up our OpenGL options
     initGame();
     // Specify the function which should execute when a key is pressed or released
-    glfwSetKeyCallback(handleKeypress);
+    glfwSetKeyCallback(gameWindow,handleKeypress);
     // Specify the function which should execute when the mouse is moved
-    glfwSetMousePosCallback(handleMouseMove);
+    glfwSetCursorPosCallback(gameWindow,handleMouseMove);  // get version info
 
-    while (running == true)
+    while (!glfwWindowShouldClose(gameWindow))
     {
         // Draw our scene
         drawScene();
@@ -269,8 +307,6 @@ int main(int argc, char **argv)
         cameraFPS.move();
         // Check for any OpenGL errors (providing the location we called the function from)
         checkGLError("Main loop");
-        // exit if ESC was pressed or window was closed
-        running = !glfwGetKey(GLFW_KEY_ESC) && glfwGetWindowParam(GLFW_OPENED);
     }
     // Clean up GLFW and exit
     glfwTerminate();

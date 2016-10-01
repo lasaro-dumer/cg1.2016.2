@@ -1,4 +1,4 @@
-CFLAGS = -lglut -lGL -lGLU -lGLee -lglfw
+CFLAGS = -lglut -lGL -lGLU -lGLee -lglfw3 -lGL -lX11 -lXi -lXrandr -lXxf86vm -lXinerama -lXcursor -lrt -lm -pthread -ldl
 GNAME = bin/spaceMission3
 BUILDER = g++
 

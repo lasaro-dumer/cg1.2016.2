@@ -21,6 +21,8 @@ private:
     bool moveBackward;
     bool moveLeft;
     bool moveRight;
+    bool moveUp;
+    bool moveDown;
     // Speed
     GLfloat speedFactor;
     void calculateCameraMovement();
@@ -49,12 +51,14 @@ public:
         this->moveBackward = false;
         this->moveLeft = false;
         this->moveRight = false;
+        this->moveUp = false;
+        this->moveDown = false;
 
         this->speedFactor = speed;
     }
     virtual ~camera ();
     void setPerspective(GLint windowHeight,GLint windowWidth);
-    void rotate(int vertMovement,int horizMovement);
+    void rotate(double vertMovement,double horizMovement);
     void move();
     void draw();
     void updateMovements(bool forward,bool backward,bool left, bool right);
@@ -62,6 +66,8 @@ public:
     void setMoveBackward(bool mBackward){ this->moveBackward = mBackward; }
     void setMoveLeft(bool mLeft){ this->moveLeft = mLeft; }
     void setMoveRight(bool mRight){ this->moveRight = mRight; }
+    void setMoveUp(bool mUp){ this->moveUp = mUp; }
+    void setMoveDown(bool mDown){ this->moveDown = mDown; }
 };
 
 #endif
