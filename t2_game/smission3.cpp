@@ -21,9 +21,6 @@ bool fullScreenMode = false;
 
 GLFWwindow* gameWindow;
 
-// Location of the sun (i.e. how far deep into the screen is it?)
-GLfloat sunZLocation = -300.0f;
-
 // How many segments make up our sphere around the latutude and longitude of the sphere
 // The higher the number, the closer an approximation to a sphere we get! Try low numbers to see how bad it looks!
 int sphereLatitudalSegments  = 100;
@@ -230,15 +227,6 @@ void drawScene()
     glTranslatef(0.0f, 200.0f, 0.0f);
     drawGround();
     glPopMatrix();
-
-    // Move everything "into" the screen (i.e. move 300 units along the Z-axis into the screen) so that all positions are now relative to the location of the sun
-    glTranslatef(0.0f, 0.0f, sunZLocation);
-
-    // Draw the sun (disable lighting so it's always drawn as bright as possible regardless of any lighting going on)
-    glColor3ub(255, 255, 0);
-    glDisable(GL_LIGHTING);
-    glutSolidSphere(15.0f, sphereLatitudalSegments, sphereLongitudalSegments);
-    glEnable(GL_LIGHTING);
 
     // Define our light position
     // *** IMPORTANT! *** A light position takes a FOUR component vector! The last component is w! If you leave off the last component, you get NO LIGHT!!!
