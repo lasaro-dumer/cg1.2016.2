@@ -4,35 +4,15 @@
 #include <GL/glfw.h>      // Include OpenGL Framework library
 #include <GL/freeglut.h>  // Include FreeGLUT so we can easily draw spheres and calculate our viewing frustrum
 #include <math.h>         // Used only for sin() and cos() functions
+#include "camera.hpp"
 
 using namespace std;
-
-const float TO_RADS = 3.141592654f / 180.0f; // The value of 1 degree in radians
 
 GLint windowWidth  = 800;                    // Width of our window
 GLint windowHeight = 600;                    // Heightof our window
 
 GLint midWindowX = windowWidth  / 2;         // Middle of the window horizontally
 GLint midWindowY = windowHeight / 2;         // Middle of the window vertically
-
-GLfloat fieldOfView = 45.0f;                 // Define our field of view (i.e. how quickly foreshortening occurs)
-GLfloat near        = 1.0f;                  // The near (Z Axis) point of our viewing frustrum (default 1.0f)
-GLfloat far         = 1500.0f;               // The far  (Z Axis) point of our viewing frustrum (default 1500.0f)
-
-// Camera rotation
-GLfloat camXRot = 0.0f;
-GLfloat camYRot = 0.0f;
-GLfloat camZRot = 0.0f;
-
-// Camera position
-GLfloat camXPos = 0.0f;
-GLfloat camYPos = 0.0f;
-GLfloat camZPos = 0.0f;
-
-// Camera movement speed
-GLfloat camXSpeed = 0.0f;
-GLfloat camYSpeed = 0.0f;
-GLfloat camZSpeed = 0.0f;
 
 // Location of the sun (i.e. how far deep into the screen is it?)
 GLfloat sunZLocation = -300.0f;
@@ -49,18 +29,10 @@ GLfloat  lightPos[] = { 0.0f, 0.0f, -300.0f, 1.0f };
 
 // How fast we move (higher values mean we move and strafe faster)
 GLfloat movementSpeedFactor = 3.0f;
+GLfloat vertMouseSensitivity  = 10.0f;
+GLfloat horizMouseSensitivity = 10.0f;
+camera cameraFPS(vertMouseSensitivity,horizMouseSensitivity,movementSpeedFactor);
 
-// Hoding any keys down?
-bool holdingForward     = false;
-bool holdingBackward    = false;
-bool holdingLeftStrafe  = false;
-bool holdingRightStrafe = false;
-
-// Function to convert degrees to radians
-float toRads(const float &theAngleInDegrees)
-{
-    return theAngleInDegrees * TO_RADS;
-}
 
 // Function to check if OpenGL is having issues - pass it a unique string of some kind to track down where in the code it's moaning
 void checkGLError(const char * errorLocation)
@@ -92,16 +64,8 @@ void initGame()
     glfwSetWindowTitle("Space Mission 3: Lost in Space");
     // Setup our viewport to be the entire size of the window
     glViewport(0, 0, (GLsizei)windowWidth, (GLsizei)windowHeight);
-    // Change to the projection matrix, reset the matrix and set up our projection
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    // The following code is a fancy bit of math that is eqivilant to calling:
-    // gluPerspective(fieldOfView/2.0f, width/height , near, far);
-    // We do it this way simply to avoid requiring glu.h
-    GLfloat aspectRatio = (windowWidth > windowHeight)? float(windowWidth)/float(windowHeight) : float(windowHeight)/float(windowWidth);
-    GLfloat fH = tan( float(fieldOfView / 360.0f * 3.14159f) ) * near;
-    GLfloat fW = fH * aspectRatio;
-    glFrustum(-fW, fW, -fH, fH, near, far);
+
+    cameraFPS.setPerspective(windowHeight,windowWidth);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -150,107 +114,13 @@ void initGame()
 // Function to deal with mouse position changes, called whenever the mouse cursorm moves
 void handleMouseMove(int mouseX, int mouseY)
 {
-    GLfloat vertMouseSensitivity  = 10.0f;
-    GLfloat horizMouseSensitivity = 10.0f;
     int horizMovement = mouseX - midWindowX;
     int vertMovement  = mouseY - midWindowY;
-    camXRot += vertMovement / vertMouseSensitivity;
-    camYRot += horizMovement / horizMouseSensitivity;
-
-    // Control looking up and down with the mouse forward/back movement
-    // Limit loking up to vertically up
-    if (camXRot < -90.0f)
-        camXRot = -90.0f;
-    // Limit looking down to vertically down
-    if (camXRot > 90.0f)
-        camXRot = 90.0f;
-    // Looking left and right. Keep the angles in the range -180.0f (anticlockwise turn looking behind) to 180.0f (clockwise turn looking behind)
-    if (camYRot < -180.0f)
-        camYRot += 360.0f;
-    if (camYRot > 180.0f)
-        camYRot -= 360.0f;
+    cameraFPS.rotate(vertMovement,horizMovement);
     // Reset the mouse position to the centre of the window each frame
     glfwSetMousePos(midWindowX, midWindowY);
 }
 
-// Function to calculate which direction we need to move the camera and by what amount
-void calculateCameraMovement()
-{
-    // Break up our movement into components along the X, Y and Z axis
-    float camMovementXComponent = 0.0f;
-    float camMovementYComponent = 0.0f;
-    float camMovementZComponent = 0.0f;
-
-    if (holdingForward == true)
-    {
-        // Control X-Axis movement
-        float pitchFactor = cos(toRads(camXRot));
-        camMovementXComponent += ( movementSpeedFactor * float(sin(toRads(camYRot))) ) * pitchFactor;
-        // Control Y-Axis movement
-        camMovementYComponent += movementSpeedFactor * float(sin(toRads(camXRot))) * -1.0f;
-        // Control Z-Axis movement
-        float yawFactor = float(cos(toRads(camXRot)));
-        camMovementZComponent += ( movementSpeedFactor * float(cos(toRads(camYRot))) * -1.0f ) * yawFactor;
-    }
-
-    if (holdingBackward == true)
-    {
-        // Control X-Axis movement
-        float pitchFactor = cos(toRads(camXRot));
-        camMovementXComponent += ( movementSpeedFactor * float(sin(toRads(camYRot))) * -1.0f) * pitchFactor;
-        // Control Y-Axis movement
-        camMovementYComponent += movementSpeedFactor * float(sin(toRads(camXRot)));
-        // Control Z-Axis movement
-        float yawFactor = float(cos(toRads(camXRot)));
-        camMovementZComponent += ( movementSpeedFactor * float(cos(toRads(camYRot))) ) * yawFactor;
-    }
-
-    if (holdingLeftStrafe == true)
-    {
-        // Calculate our Y-Axis rotation in radians once here because we use it twice
-        float yRotRad = toRads(camYRot);
-        camMovementXComponent += -movementSpeedFactor * float(cos(yRotRad));
-        camMovementZComponent += -movementSpeedFactor * float(sin(yRotRad));
-    }
-
-    if (holdingRightStrafe == true)
-    {
-        // Calculate our Y-Axis rotation in radians once here because we use it twice
-        float yRotRad = toRads(camYRot);
-        camMovementXComponent += movementSpeedFactor * float(cos(yRotRad));
-        camMovementZComponent += movementSpeedFactor * float(sin(yRotRad));
-    }
-    // After combining our movements for any & all keys pressed, assign them to our camera speed along the given axis
-    camXSpeed = camMovementXComponent;
-    camYSpeed = camMovementYComponent;
-    camZSpeed = camMovementZComponent;
-    // Cap the speeds to our movementSpeedFactor (otherwise going forward and strafing at an angle is twice as fast as just going forward!)
-    // X Speed cap
-    if (camXSpeed > movementSpeedFactor)
-        camXSpeed = movementSpeedFactor;
-    if (camXSpeed < -movementSpeedFactor)
-        camXSpeed = -movementSpeedFactor;
-    // Y Speed cap
-    if (camYSpeed > movementSpeedFactor)
-        camYSpeed = movementSpeedFactor;
-    if (camYSpeed < -movementSpeedFactor)
-        camYSpeed = -movementSpeedFactor;
-    // Z Speed cap
-    if (camZSpeed > movementSpeedFactor)
-        camZSpeed = movementSpeedFactor;
-    if (camZSpeed < -movementSpeedFactor)
-        camZSpeed = -movementSpeedFactor;
-}
-
-// Function to move the camera the amount we've calculated in the calculateCameraMovement function
-void moveCamera()
-{
-    // Calculate our camera movement
-    calculateCameraMovement();
-    camXPos += camXSpeed;
-    camYPos += camYSpeed;
-    camZPos += camZSpeed;
-}
 
 // Function to set flags according to which keys are pressed or released
 void handleKeypress(int theKey, int theAction)
@@ -260,10 +130,10 @@ void handleKeypress(int theKey, int theAction)
     {
         switch(theKey)
         {
-            case 'W':   holdingForward = true;      break;
-            case 'S':   holdingBackward = true;     break;
-            case 'A':   holdingLeftStrafe = true;   break;
-            case 'D':   holdingRightStrafe = true;  break;
+            case 'W':   cameraFPS.setMoveForward(true);      break;
+            case 'S':   cameraFPS.setMoveBackward(true);     break;
+            case 'A':   cameraFPS.setMoveLeft(true);   break;
+            case 'D':   cameraFPS.setMoveRight(true);  break;
             default:    /*Do nothing...*/           break;
         }
     }
@@ -271,10 +141,10 @@ void handleKeypress(int theKey, int theAction)
     {
         switch(theKey)
         {
-            case 'W':   holdingForward = false;     break;
-            case 'S':   holdingBackward = false;    break;
-            case 'A':   holdingLeftStrafe = false;  break;
-            case 'D':   holdingRightStrafe = false; break;
+            case 'W':   cameraFPS.setMoveForward(false);     break;
+            case 'S':   cameraFPS.setMoveBackward(false);    break;
+            case 'A':   cameraFPS.setMoveLeft(false);  break;
+            case 'D':   cameraFPS.setMoveRight(false); break;
             default:    /* Do nothing...*/          break;
         }
     }
@@ -311,10 +181,7 @@ void drawScene()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    // Move the camera to our location in space
-    glRotatef(camXRot, 1.0f, 0.0f, 0.0f);        // Rotate our camera on the x-axis (looking up and down)
-    glRotatef(camYRot, 0.0f, 1.0f, 0.0f);        // Rotate our camera on the  y-axis (looking left and right)
-    glTranslatef(-camXPos,-camYPos,-camZPos);    // Translate the modelviewm matrix to the position of our camera
+    cameraFPS.draw();
 
     // Draw the lower ground-grid
     drawGround();
@@ -399,7 +266,7 @@ int main(int argc, char **argv)
         // Draw our scene
         drawScene();
         // Move our camera
-        moveCamera();
+        cameraFPS.move();
         // Check for any OpenGL errors (providing the location we called the function from)
         checkGLError("Main loop");
         // exit if ESC was pressed or window was closed

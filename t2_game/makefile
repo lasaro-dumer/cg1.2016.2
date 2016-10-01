@@ -1,8 +1,10 @@
 CFLAGS = -lglut -lGL -lGLU -lGLee -lglfw
-GNAME = spaceMission3
+GNAME = bin/spaceMission3
 BUILDER = g++
 
-default:
-	$(BUILDER) smission3.cpp $(CFLAGS) -o $(GNAME)
+default: mkbin
+	$(BUILDER) *.cpp $(CFLAGS) -o $(GNAME)
+mkbin:
+	mkdir -p bin
 clean:
 	rm -rf $(GNAME) *.o *.gch

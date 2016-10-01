@@ -10,3 +10,6 @@ bower_components
 /t1_analysis/build/
 /t1_analysis/dist/
 /nbproject/private/
+t2_game/bin
+*.gch
+*.o
