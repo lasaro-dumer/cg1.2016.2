@@ -1,6 +1,7 @@
 #ifndef cameraH
 #define cameraH
 #include <GLee.h>
+#include "elements/point3D.hpp"
 
 class camera {
 private:
@@ -61,6 +62,7 @@ public:
     void rotate(double vertMovement,double horizMovement);
     void move();
     void draw();
+    point3D* getCurrentPosition();
     void updateMovements(bool forward,bool backward,bool left, bool right);
     void setMoveForward(bool mForward){ this->moveForward = mForward; }
     void setMoveBackward(bool mBackward){ this->moveBackward = mBackward; }

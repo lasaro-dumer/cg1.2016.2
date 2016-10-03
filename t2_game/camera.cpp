@@ -2,6 +2,7 @@
 #include <math.h>
 #include "camera.hpp"
 #include "smmath.hpp"
+#include "elements/point3D.hpp"
 
 void camera::setPerspective(GLint windowHeight,GLint windowWidth){
     // Change to the projection matrix, reset the matrix and set up our projection
@@ -14,6 +15,10 @@ void camera::setPerspective(GLint windowHeight,GLint windowWidth){
     GLfloat fH = tan( float(fieldOfView / 360.0f * 3.14159f) ) * near;
     GLfloat fW = fH * aspectRatio;
     glFrustum(-fW, fW, -fH, fH, near, far);
+}
+
+point3D* camera::getCurrentPosition(){
+    return new point3D(this->camXPos,this->camYPos,this->camZPos,this->camXRot,this->camYRot,this->camZRot);
 }
 
 void camera::rotate(double vertMovement,double horizMovement){

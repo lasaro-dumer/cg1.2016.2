@@ -4,12 +4,15 @@
 #include <GLFW/glfw3.h>      // Include OpenGL Framework library
 #include <GL/freeglut.h>  // Include FreeGLUT so we can easily draw spheres and calculate our viewing frustrum
 #include <math.h>         // Used only for sin() and cos() functions
+#include <list>
 #include "camera.hpp"
+#include "elements/point3D.hpp"
+#include "elements/shoot.hpp"
 
 using namespace std;
 
-GLint windowWidth  = 800;                    // Width of our window
-GLint windowHeight = 600;                    // Heightof our window
+GLint windowWidth  = 1024;                    // Width of our window
+GLint windowHeight = 768;                    // Heightof our window
 GLint oldWindowWidth,oldWindowHeight;
 GLint windowPosX   = 50;      // Windowed mode's top-left corner x
 GLint windowPosY   = 50;      // Windowed mode's top-left corner y
@@ -36,6 +39,8 @@ GLfloat movementSpeedFactor = 3.0f;
 GLfloat vertMouseSensitivity  = 10.0f;
 GLfloat horizMouseSensitivity = 10.0f;
 camera cameraFPS(vertMouseSensitivity,horizMouseSensitivity,movementSpeedFactor);
+
+list<shoot*> shoots;
 
 char windowTitle[] = "Space Mission 3: Lost in Space";
 
@@ -147,6 +152,13 @@ void handleMouseMove(GLFWwindow* window, double mouseX, double mouseY)
     glfwSetCursorPos(gameWindow, midWindowX, midWindowY);
 }
 
+void handleMouseButton(GLFWwindow* window, int button, int action, int mods)
+{
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
+        shoots.push_back(new shoot(cameraFPS.getCurrentPosition()));
+    }
+}
+
 // Function to set flags according to which keys are pressed or released
 void handleKeypress(GLFWwindow* window, int theKey, int scancode, int theAction, int mods)
 {
@@ -192,7 +204,7 @@ void drawGround()
 {
     GLfloat extent      = 600.0f; // How far on the Z-Axis and X-Axis the ground extends
     GLfloat stepSize    = 20.0f;  // The size of the separation between points
-    GLfloat groundLevel = -50.0f;   // Where on the Y-Axis the ground is drawn
+    GLfloat groundLevel = -100.0f;   // Where on the Y-Axis the ground is drawn
     // Set colour to white
     glColor3ub(255, 255, 255);
     // Draw our ground grid
@@ -209,6 +221,35 @@ void drawGround()
     glEnd();
 }
 
+void drawAxis(GLfloat lineLength) {
+    glBegin(GL_LINES);
+        //Red positive X-Axis
+        glColor3f(1.0f, 0.0f, 0.0f);
+        glVertex3f(0,0,0);
+        glVertex3f(lineLength,0,0);
+        for (GLfloat i = 0; i > -lineLength; i=i-5) {
+            glVertex3f(i,0,0);
+            glVertex3f(i-2.5f,0,0);
+        }
+        //Blue positive Y-Axis
+        glColor3f(0.0f, 0.0f, 1.0f);
+        glVertex3f(0,0,0);
+        glVertex3f(0,lineLength,0);
+        for (GLfloat i = 0; i > -lineLength; i=i-5) {
+            glVertex3f(0,i,0);
+            glVertex3f(0,i-2.5f,0);
+        }
+        //Green positive Z-Axis
+        glColor3f(0.0f, 1.0f, 0.0f);
+        glVertex3f(0,0,0);
+        glVertex3f(0,0,lineLength);
+        for (GLfloat i = 0; i > -lineLength; i=i-5) {
+            glVertex3f(0,0,i);
+            glVertex3f(0,0,i-2.5f);
+        }
+    glEnd();
+}
+
 // Function to draw our spheres and position the light source
 void drawScene()
 {
@@ -220,6 +261,13 @@ void drawScene()
 
     cameraFPS.draw();
 
+    // Define our light position
+    // *** IMPORTANT! *** A light position takes a FOUR component vector! The last component is w! If you leave off the last component, you get NO LIGHT!!!
+    GLfloat newLightPos[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+
+    glLightfv(GL_LIGHT0, GL_POSITION, newLightPos);  // Place the light where the sun is!
+
+    //*
     // Draw the lower ground-grid
     drawGround();
     // Draw the upper ground-grid, keeping a copy of our current matrix on the stack before we translate it
@@ -228,11 +276,15 @@ void drawScene()
     drawGround();
     glPopMatrix();
 
-    // Define our light position
-    // *** IMPORTANT! *** A light position takes a FOUR component vector! The last component is w! If you leave off the last component, you get NO LIGHT!!!
-    GLfloat newLightPos[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    drawAxis(300);
 
-    glLightfv(GL_LIGHT0, GL_POSITION, newLightPos);  // Place the light where the sun is!
+    list<shoot*>::iterator is;
+    for (is = shoots.begin(); is != shoots.end(); ++is) {
+        if((*is)->isAlive())
+            (*is)->draw();
+        else
+            is = shoots.erase(is);
+    }
 
     // ----- Stop Drawing Stuff! ------
     glfwSwapBuffers(gameWindow); // Swap the buffers to display the scene (so we don't have to watch it being drawn!)
@@ -285,7 +337,9 @@ int main(int argc, char **argv)
     // Specify the function which should execute when a key is pressed or released
     glfwSetKeyCallback(gameWindow,handleKeypress);
     // Specify the function which should execute when the mouse is moved
-    glfwSetCursorPosCallback(gameWindow,handleMouseMove);  // get version info
+    glfwSetCursorPosCallback(gameWindow,handleMouseMove);
+    // Specify the function which should execute when a mouse button is pressed or released
+    glfwSetMouseButtonCallback(gameWindow, handleMouseButton);
 
     while (!glfwWindowShouldClose(gameWindow))
     {
