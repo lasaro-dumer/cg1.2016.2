@@ -1,6 +1,10 @@
 #ifndef point3DH
 #define point3DH
 #include <GLee.h>
+#include <string>
+#include <sstream>
+
+using namespace std;
 
 class point3D {
 private:
@@ -39,5 +43,13 @@ public:
     GLfloat getXRot(){ return this->xr;}
     GLfloat getYRot(){ return this->yr;}
     GLfloat getZRot(){ return this->zr;}
+    void draw(){
+        glVertex3f(this->x,this->y,this->z);
+    }
+    string toString(){
+        stringstream ss;
+        ss << "("<<this->x<<","<<this->y<<","<<this->z<<")@("<<this->xr<<","<<this->yr<<","<<this->zr<<")";
+        return ss.str();
+    }
 };
 #endif

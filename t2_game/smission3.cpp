@@ -5,9 +5,17 @@
 #include <GL/freeglut.h>  // Include FreeGLUT so we can easily draw spheres and calculate our viewing frustrum
 #include <math.h>         // Used only for sin() and cos() functions
 #include <list>
+#include <map>
+#include <vector>
+#include <stdio.h>
+#include <string>
+#include <cstring>
 #include "camera.hpp"
 #include "elements/point3D.hpp"
+#include "elements/colorRgb.hpp"
 #include "elements/shoot.hpp"
+#include "elements/modelObj.hpp"
+#include "elements/asteroid.hpp"
 
 using namespace std;
 
@@ -40,6 +48,7 @@ GLfloat vertMouseSensitivity  = 10.0f;
 GLfloat horizMouseSensitivity = 10.0f;
 camera cameraFPS(vertMouseSensitivity,horizMouseSensitivity,movementSpeedFactor);
 
+map<string,modelObj*> modelObjs;
 list<shoot*> shoots;
 
 char windowTitle[] = "Space Mission 3: Lost in Space";
@@ -88,9 +97,19 @@ void setFullScreen(bool toFullScreen) {
     glViewport(0, 0, (GLsizei)windowWidth, (GLsizei)windowHeight);
     cameraFPS.setPerspective(windowHeight,windowWidth);
 }
-
+asteroid* ast1;
+asteroid* ast2;
 void initGame()
 {
+
+    colorRgb* astColor = new colorRgb(160,100,20);
+    modelObj* ast1Model = new modelObj(astColor,false);
+    ast1Model->loadFromFile("data/models/asteroid1.obj");
+    modelObjs["asteroid1"] = ast1Model;
+
+    ast1 = new asteroid(modelObjs["asteroid1"],new point3D(50,0,50),1000.0f);
+    ast1->setSpeed(0);
+    ast2 = new asteroid(modelObjs["asteroid1"],new point3D(0,0,0,1,1,1),100.0f);
     // ----- GLFW Settings -----
     glfwSetInputMode(gameWindow,GLFW_CURSOR,GLFW_CURSOR_DISABLED); // Hide the mouse cursor
     // ----- Window and Projection Settings -----
@@ -155,7 +174,7 @@ void handleMouseMove(GLFWwindow* window, double mouseX, double mouseY)
 void handleMouseButton(GLFWwindow* window, int button, int action, int mods)
 {
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
-        shoots.push_back(new shoot(cameraFPS.getCurrentPosition()));
+        shoots.push_back(new shoot(cameraFPS.getCurrentPosition(),new colorRgb(255,60,0)));
     }
 }
 
@@ -250,6 +269,71 @@ void drawAxis(GLfloat lineLength) {
     glEnd();
 }
 
+void draw3DRect(GLfloat faceSize, GLfloat depth) {
+    glBegin(GL_QUADS);
+        //Front face
+        glVertex3f(       0,faceSize,0);
+        glVertex3f(       0,       0,0);
+        glVertex3f(faceSize,       0,0);
+        glVertex3f(faceSize,faceSize,0);
+
+        // glVertex3f(faceSize,faceSize,0);
+        // glVertex3f(faceSize,       0,0);
+        // glVertex3f(       0,       0,0);
+        // glVertex3f(       0,faceSize,0);
+        //Right face
+        glVertex3f(faceSize,       0,0);
+        glVertex3f(faceSize,       0,-depth);
+        glVertex3f(faceSize,faceSize,-depth);
+        glVertex3f(faceSize,faceSize,0);
+
+        // glVertex3f(faceSize,faceSize,0);
+        // glVertex3f(faceSize,faceSize,-depth);
+        // glVertex3f(faceSize,       0,-depth);
+        // glVertex3f(faceSize,       0,0);
+        //Left face
+        glVertex3f(       0,faceSize,0);
+        glVertex3f(       0,faceSize,-depth);
+        glVertex3f(       0,       0,-depth);
+        glVertex3f(       0,       0,0);
+
+        // glVertex3f(       0,       0,0);
+        // glVertex3f(       0,       0,-depth);
+        // glVertex3f(       0,faceSize,-depth);
+        // glVertex3f(       0,faceSize,0);
+        //Top face
+        glVertex3f(faceSize,faceSize,0);
+        glVertex3f(faceSize,faceSize,-depth);
+        glVertex3f(       0,faceSize,-depth);
+        glVertex3f(       0,faceSize,0);
+
+        // glVertex3f(       0,faceSize,0);
+        // glVertex3f(       0,faceSize,-depth);
+        // glVertex3f(faceSize,faceSize,-depth);
+        // glVertex3f(faceSize,faceSize,0);
+        //Bottom face
+        glVertex3f(       0,       0,0);
+        glVertex3f(       0,       0,-depth);
+        glVertex3f(faceSize,       0,-depth);
+        glVertex3f(faceSize,       0,0);
+
+        // glVertex3f(faceSize,       0,0);
+        // glVertex3f(faceSize,       0,-depth);
+        // glVertex3f(       0,       0,-depth);
+        // glVertex3f(       0,       0,0);
+        //Back face
+        glVertex3f(faceSize,faceSize,-depth);
+        glVertex3f(faceSize,       0,-depth);
+        glVertex3f(       0,       0,-depth);
+        glVertex3f(       0,faceSize,-depth);
+
+        // glVertex3f(       0,faceSize,-depth);
+        // glVertex3f(       0,       0,-depth);
+        // glVertex3f(faceSize,       0,-depth);
+        // glVertex3f(faceSize,faceSize,-depth);
+    glEnd();
+}
+
 // Function to draw our spheres and position the light source
 void drawScene()
 {
@@ -278,10 +362,19 @@ void drawScene()
 
     drawAxis(300);
 
+    glTranslatef(20,20,20);
+    glColor3ub(255,255,0);
+    draw3DRect(20,50);
+    glTranslatef(-20,-20,-20);
+
+    ast1->draw();
+    ast2->draw();
+
     list<shoot*>::iterator is;
     for (is = shoots.begin(); is != shoots.end(); ++is) {
-        if((*is)->isAlive())
+        if((*is)->isAlive()){
             (*is)->draw();
+        }
         else
             is = shoots.erase(is);
     }
