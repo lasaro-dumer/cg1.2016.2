@@ -3,7 +3,7 @@ OUTDIR = bin
 MODELSOUT = $(OUTDIR)/data/models
 GNAME = $(OUTDIR)/spaceMission3
 BUILDER = g++
-SOURCE = *.cpp elements/*.cpp
+SOURCE = *.cpp elements/*.cpp util/*.cpp
 
 default: mkout
 	$(BUILDER) $(SOURCE) $(CFLAGS) -o $(GNAME)
@@ -13,7 +13,9 @@ mkdmodels:
 	mkdir -p $(MODELSOUT)
 cpmodels:
 	cp -r data/models/*.obj $(MODELSOUT)
-mkout: mkbin mkdmodels cpmodels
+cpopt:
+	cp options.ini $(OUTDIR)/options.ini
+mkout: mkbin cpopt mkdmodels cpmodels
 
 clean:
 	rm -rf *.o *.gch $(OUTDIR)

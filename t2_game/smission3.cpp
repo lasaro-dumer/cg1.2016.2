@@ -10,7 +10,9 @@
 #include <stdio.h>
 #include <string>
 #include <cstring>
-#include "camera.hpp"
+#include "util/camera.hpp"
+#include "util/options.hpp"
+#include "util/smmath.hpp"
 #include "elements/point3D.hpp"
 #include "elements/colorRgb.hpp"
 #include "elements/shoot.hpp"
@@ -21,7 +23,6 @@ using namespace std;
 
 GLint windowWidth  = 1024;                    // Width of our window
 GLint windowHeight = 768;                    // Heightof our window
-GLint oldWindowWidth,oldWindowHeight;
 GLint windowPosX   = 50;      // Windowed mode's top-left corner x
 GLint windowPosY   = 50;      // Windowed mode's top-left corner y
 
@@ -32,27 +33,19 @@ bool fullScreenMode = false;
 
 GLFWwindow* gameWindow;
 
-// How many segments make up our sphere around the latutude and longitude of the sphere
-// The higher the number, the closer an approximation to a sphere we get! Try low numbers to see how bad it looks!
-int sphereLatitudalSegments  = 100;
-int sphereLongitudalSegments = 100;
-
 // Set the light source location to be the same as the sun position
 // Don't forget that the position is a FOUR COMPONENT VECTOR (with the last component as w) if you omit the last component expect to get NO LIGHT!!!
 // Learnt that one the hard way... =P
 GLfloat  lightPos[] = { 0.0f, 0.0f, -300.0f, 1.0f };
 
-// How fast we move (higher values mean we move and strafe faster)
-GLfloat movementSpeedFactor = 3.0f;
-GLfloat vertMouseSensitivity  = 10.0f;
-GLfloat horizMouseSensitivity = 10.0f;
-camera cameraFPS(vertMouseSensitivity,horizMouseSensitivity,movementSpeedFactor);
+camera cameraFPS;
 
 map<string,modelObj*> modelObjs;
 list<shoot*> shoots;
+list<asteroid*> asteroids;
 
 char windowTitle[] = "Space Mission 3: Lost in Space";
-
+options gameOptions;
 // Function to check if OpenGL is having issues - pass it a unique string of some kind to track down where in the code it's moaning
 void checkGLError(const char * errorLocation)
 {
@@ -84,34 +77,43 @@ void setFullScreen(bool toFullScreen) {
     if (fullScreenMode) {                     // Full-screen mode
         monitor = glfwGetPrimaryMonitor();
         const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-        oldWindowWidth = windowWidth;
-        oldWindowHeight = windowHeight;
-        windowWidth = mode->width;
-        windowHeight = mode->height;
+        if(gameOptions.isFullscreenMaxSize()){
+            windowWidth = mode->width;
+            windowHeight = mode->height;
+        }else{
+            windowWidth = gameOptions.getFullscreenWidth();
+            windowHeight = gameOptions.getFullscreenHeight();
+        }
     } else {                                         // Windowed mode
-        windowWidth = oldWindowWidth;
-        windowHeight = oldWindowHeight;
+        windowWidth = gameOptions.getWindowedWidth();
+        windowHeight = gameOptions.getWindowedHeight();
     }
+    midWindowX = windowWidth  / 2;
+    midWindowY = windowHeight / 2;
+    std::cout << "setting windowWidth: " << windowWidth << " & windowHeight: " << windowHeight << std::endl;
     glfwSetWindowMonitor(gameWindow,monitor,windowPosX,windowPosY,windowWidth,windowHeight,GLFW_DONT_CARE);
     glfwSetWindowSize(gameWindow,windowWidth,windowHeight);
     glViewport(0, 0, (GLsizei)windowWidth, (GLsizei)windowHeight);
     cameraFPS.setPerspective(windowHeight,windowWidth);
 }
-asteroid* ast1;
-asteroid* ast2;
+
 void initGame()
 {
+    gameOptions.load();
 
     colorRgb* astColor = new colorRgb(160,100,20);
-    modelObj* ast1Model = new modelObj(astColor,false);
-    ast1Model->loadFromFile("data/models/asteroid1.obj");
-    modelObjs["asteroid1"] = ast1Model;
+    modelObjs["asteroid1"] = new modelObj(astColor,true);
+    modelObjs["asteroid1"]->loadFromFile("data/models/asteroid1.obj");
+    //modelObjs["asteroid1"]->drawVolume = true;
+    modelObjs["shoot1"] = new modelObj(new colorRgb(255,60,0),true);
+    modelObjs["shoot1"]->loadFromFile("data/models/shoot1.obj");
+    //modelObjs["shoot1"]->drawVolume = true;
 
-    ast1 = new asteroid(modelObjs["asteroid1"],new point3D(50,0,50),1000.0f);
-    ast1->setSpeed(0);
-    ast2 = new asteroid(modelObjs["asteroid1"],new point3D(0,0,0,1,1,1),100.0f);
+    cameraFPS.setMouseSensitivity(gameOptions.getMouseSensitivity());
+    cameraFPS.setSpeed(gameOptions.getSpeed());
+    setFullScreen(gameOptions.isFullscreen());
     // ----- GLFW Settings -----
-    glfwSetInputMode(gameWindow,GLFW_CURSOR,GLFW_CURSOR_DISABLED); // Hide the mouse cursor
+    //glfwSetInputMode(gameWindow,GLFW_CURSOR,GLFW_CURSOR_DISABLED); // Hide the mouse cursor
     // ----- Window and Projection Settings -----
     // Setup our viewport to be the entire size of the window
     glViewport(0, 0, (GLsizei)windowWidth, (GLsizei)windowHeight);
@@ -157,6 +159,9 @@ void initGame()
     glMaterialfv(GL_FRONT, GL_SPECULAR, materialSpecularReflectance);
     glMateriali(GL_FRONT, GL_SHININESS, specularMagnitude);
 
+    asteroids.push_back(new asteroid(modelObjs["asteroid1"],new point3D(50,0,50)    ,1000.0f,0.0f));
+    asteroids.push_back(new asteroid(modelObjs["asteroid1"],new point3D(0,0,0,1,1,1),101.0f ,0.05f));
+
     // Check for any OpenGL errors (providing the location we called the function from)
     checkGLError("initGame");
 }
@@ -174,7 +179,9 @@ void handleMouseMove(GLFWwindow* window, double mouseX, double mouseY)
 void handleMouseButton(GLFWwindow* window, int button, int action, int mods)
 {
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
-        shoots.push_back(new shoot(cameraFPS.getCurrentPosition(),new colorRgb(255,60,0)));
+        shoot* s = new shoot(cameraFPS.getCurrentPosition(),modelObjs["shoot1"],5);
+        s->setSpeed(0.25f);
+        shoots.push_back(s);
     }
 }
 
@@ -269,71 +276,6 @@ void drawAxis(GLfloat lineLength) {
     glEnd();
 }
 
-void draw3DRect(GLfloat faceSize, GLfloat depth) {
-    glBegin(GL_QUADS);
-        //Front face
-        glVertex3f(       0,faceSize,0);
-        glVertex3f(       0,       0,0);
-        glVertex3f(faceSize,       0,0);
-        glVertex3f(faceSize,faceSize,0);
-
-        // glVertex3f(faceSize,faceSize,0);
-        // glVertex3f(faceSize,       0,0);
-        // glVertex3f(       0,       0,0);
-        // glVertex3f(       0,faceSize,0);
-        //Right face
-        glVertex3f(faceSize,       0,0);
-        glVertex3f(faceSize,       0,-depth);
-        glVertex3f(faceSize,faceSize,-depth);
-        glVertex3f(faceSize,faceSize,0);
-
-        // glVertex3f(faceSize,faceSize,0);
-        // glVertex3f(faceSize,faceSize,-depth);
-        // glVertex3f(faceSize,       0,-depth);
-        // glVertex3f(faceSize,       0,0);
-        //Left face
-        glVertex3f(       0,faceSize,0);
-        glVertex3f(       0,faceSize,-depth);
-        glVertex3f(       0,       0,-depth);
-        glVertex3f(       0,       0,0);
-
-        // glVertex3f(       0,       0,0);
-        // glVertex3f(       0,       0,-depth);
-        // glVertex3f(       0,faceSize,-depth);
-        // glVertex3f(       0,faceSize,0);
-        //Top face
-        glVertex3f(faceSize,faceSize,0);
-        glVertex3f(faceSize,faceSize,-depth);
-        glVertex3f(       0,faceSize,-depth);
-        glVertex3f(       0,faceSize,0);
-
-        // glVertex3f(       0,faceSize,0);
-        // glVertex3f(       0,faceSize,-depth);
-        // glVertex3f(faceSize,faceSize,-depth);
-        // glVertex3f(faceSize,faceSize,0);
-        //Bottom face
-        glVertex3f(       0,       0,0);
-        glVertex3f(       0,       0,-depth);
-        glVertex3f(faceSize,       0,-depth);
-        glVertex3f(faceSize,       0,0);
-
-        // glVertex3f(faceSize,       0,0);
-        // glVertex3f(faceSize,       0,-depth);
-        // glVertex3f(       0,       0,-depth);
-        // glVertex3f(       0,       0,0);
-        //Back face
-        glVertex3f(faceSize,faceSize,-depth);
-        glVertex3f(faceSize,       0,-depth);
-        glVertex3f(       0,       0,-depth);
-        glVertex3f(       0,faceSize,-depth);
-
-        // glVertex3f(       0,faceSize,-depth);
-        // glVertex3f(       0,       0,-depth);
-        // glVertex3f(faceSize,       0,-depth);
-        // glVertex3f(faceSize,faceSize,-depth);
-    glEnd();
-}
-
 // Function to draw our spheres and position the light source
 void drawScene()
 {
@@ -362,23 +304,32 @@ void drawScene()
 
     drawAxis(300);
 
-    glTranslatef(20,20,20);
-    glColor3ub(255,255,0);
-    draw3DRect(20,50);
-    glTranslatef(-20,-20,-20);
-
-    ast1->draw();
-    ast2->draw();
-
     list<shoot*>::iterator is;
+    list<asteroid*>::iterator ia;
     for (is = shoots.begin(); is != shoots.end(); ++is) {
         if((*is)->isAlive()){
             (*is)->draw();
+            for (ia = asteroids.begin(); ia != asteroids.end(); ++ia) {
+                if((*ia)->isAlive())
+                    (*is)->hitAsteroid((*ia));
+            }
         }
         else
             is = shoots.erase(is);
     }
 
+    for (ia = asteroids.begin(); ia != asteroids.end(); ++ia) {
+        if((*ia)->isAlive())
+            (*ia)->draw();
+        else{
+            list<asteroid*> children = (*ia)->getChildren();
+            list<asteroid*>::iterator ic;
+            for (ic = children.begin(); ic != children.end(); ++ic) {
+                asteroids.push_back((*ic));
+            }
+            ia = asteroids.erase(ia);
+        }
+    }
     // ----- Stop Drawing Stuff! ------
     glfwSwapBuffers(gameWindow); // Swap the buffers to display the scene (so we don't have to watch it being drawn!)
     glfwPollEvents();

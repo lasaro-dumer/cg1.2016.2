@@ -4,10 +4,13 @@
 #include "point3D.hpp"
 #include "colorRgb.hpp"
 #include "baseElement.hpp"
-#include "../smmath.hpp"
+#include "../util/smmath.hpp"
 
 void baseElement::calculateMovementForward(){
     // Control X-Axis movement
+    this->xMove = 0.0f;
+    this->yMove = 0.0f;
+    this->zMove = 0.0f;
     float pitchFactor = cos(toRads(this->position->getXRot()));
     this->xMove += ( this->speedFactor * float(sin(toRads(this->position->getYRot()))) ) * pitchFactor;
     // Control Y-Axis movement

@@ -28,8 +28,10 @@ public:
         this->calculateMovementForward();
     }
     void beforeDraw();
-    virtual void draw(){}
     void afterDraw();
+    point3D* getPosition(){ return this->position; }
+    virtual void draw(){}
+    virtual bool isAlive(){}
 };
 
 #endif

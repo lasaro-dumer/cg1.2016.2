@@ -1,7 +1,7 @@
 #ifndef cameraH
 #define cameraH
 #include <GLee.h>
-#include "elements/point3D.hpp"
+#include "../elements/point3D.hpp"
 
 class camera {
 private:
@@ -15,8 +15,7 @@ private:
     // Camera movement speed
     GLfloat camXSpeed,camYSpeed,camZSpeed;
     // Mouse sensitivity
-    GLfloat vertMouseSensitivity;
-    GLfloat horizMouseSensitivity;
+    GLfloat sensitivity;
     // Camera moving directions. to use on .move()
     bool moveForward;
     bool moveBackward;
@@ -28,7 +27,7 @@ private:
     GLfloat speedFactor;
     void calculateCameraMovement();
 public:
-    camera (GLfloat vertSensitivity, GLfloat horizSensitivity, GLfloat speed){
+    camera (){
         this->fieldOfView = 45.0f;
         this->near        = 1.0f;
         this->far         = 1500.0f;
@@ -45,8 +44,7 @@ public:
         this->camYSpeed = 0.0f;
         this->camZSpeed = 0.0f;
 
-        this->vertMouseSensitivity = vertSensitivity;
-        this->horizMouseSensitivity = horizSensitivity;
+        this->sensitivity = 10.0f;
 
         this->moveForward = false;
         this->moveBackward = false;
@@ -55,9 +53,11 @@ public:
         this->moveUp = false;
         this->moveDown = false;
 
-        this->speedFactor = speed;
+        this->speedFactor = 3;
     }
     virtual ~camera ();
+    void setMouseSensitivity(GLfloat value){ this->sensitivity = value;}
+    void setSpeed(GLfloat value){ this->speedFactor = value;}
     void setPerspective(GLint windowHeight,GLint windowWidth);
     void rotate(double vertMovement,double horizMovement);
     void move();

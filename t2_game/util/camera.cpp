@@ -2,15 +2,12 @@
 #include <math.h>
 #include "camera.hpp"
 #include "smmath.hpp"
-#include "elements/point3D.hpp"
+#include "../elements/point3D.hpp"
 
 void camera::setPerspective(GLint windowHeight,GLint windowWidth){
     // Change to the projection matrix, reset the matrix and set up our projection
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    // The following code is a fancy bit of math that is eqivilant to calling:
-    // gluPerspective(fieldOfView/2.0f, width/height , near, far);
-    // We do it this way simply to avoid requiring glu.h
     GLfloat aspectRatio = (windowWidth > windowHeight)? float(windowWidth)/float(windowHeight) : float(windowHeight)/float(windowWidth);
     GLfloat fH = tan( float(fieldOfView / 360.0f * 3.14159f) ) * near;
     GLfloat fW = fH * aspectRatio;
@@ -22,8 +19,8 @@ point3D* camera::getCurrentPosition(){
 }
 
 void camera::rotate(double vertMovement,double horizMovement){
-    this->camXRot += vertMovement / this->vertMouseSensitivity;
-    this->camYRot += horizMovement / this->horizMouseSensitivity;
+    this->camXRot += vertMovement / this->sensitivity;
+    this->camYRot += horizMovement / this->sensitivity;
 
     // Control looking up and down with the mouse forward/back movement
     // Limit loking up to vertically up
