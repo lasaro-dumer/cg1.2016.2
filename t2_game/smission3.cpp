@@ -114,6 +114,8 @@ void initGame()
     setFullScreen(gameOptions.isFullscreen());
     // ----- GLFW Settings -----
     //glfwSetInputMode(gameWindow,GLFW_CURSOR,GLFW_CURSOR_DISABLED); // Hide the mouse cursor
+    GLFWcursor* cursor = glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR);
+    glfwSetCursor(gameWindow, cursor);
     // ----- Window and Projection Settings -----
     // Setup our viewport to be the entire size of the window
     glViewport(0, 0, (GLsizei)windowWidth, (GLsizei)windowHeight);
