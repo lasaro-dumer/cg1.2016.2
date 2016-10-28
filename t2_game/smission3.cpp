@@ -33,10 +33,8 @@ bool fullScreenMode = false;
 
 GLFWwindow* gameWindow;
 
-// Set the light source location to be the same as the sun position
-// Don't forget that the position is a FOUR COMPONENT VECTOR (with the last component as w) if you omit the last component expect to get NO LIGHT!!!
-// Learnt that one the hard way... =P
-GLfloat  lightPos[] = { 0.0f, 0.0f, -300.0f, 1.0f };
+// Set the light source location
+GLfloat  lightPos[] = { 2.0f, 2.0f, 10.0f, 1.0f };
 
 camera cameraFPS;
 
@@ -97,6 +95,30 @@ void setFullScreen(bool toFullScreen) {
     cameraFPS.setPerspective(windowHeight,windowWidth);
 }
 
+void setLights() {
+    // Ambient, diffuse and specular lighting values (note that these are ALL FOUR COMPONENT VECTORS!)
+    GLfloat  ambientLight[] = { 0.2f, 0.2f, 0.2f, 1.0f };
+    GLfloat  diffuseLight[] = { 0.7f, 0.7f, 0.7f, 1.0f };
+    GLfloat specularLight[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+    // ---- Set up OpenGL lighting -----
+    glShadeModel(GL_SMOOTH);    // Enable (gouraud) shading
+    // Use our shiny material and magnitude
+    // Define the shininess of the material we'll use to draw things
+    GLfloat materialSpecularReflectance[] = { 0, 0, 0, 1.0f };
+    glMaterialfv(GL_FRONT, GL_SPECULAR, materialSpecularReflectance);
+    GLint specularMagnitude = 128; // Define how "tight" our specular highlights are (larger number = smaller specular highlight). The valid range is is 1 to 128
+    glMateriali(GL_FRONT, GL_SHININESS, specularMagnitude);
+    // Enable lighting
+    glEnable(GL_LIGHTING);
+    // Setup and enable light 0
+    glLightfv(GL_LIGHT0, GL_AMBIENT,  ambientLight);      // Specify ambient light properties
+    glLightfv(GL_LIGHT0, GL_DIFFUSE,  diffuseLight);      // Specify diffuse light properties
+    glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);     // Specify specular light properties
+    glLightfv(GL_LIGHT0, GL_POSITION, lightPos);          // Specify the position of the light
+    glEnable(GL_LIGHT0);
+}
+
 void initGame()
 {
     gameOptions.load();
@@ -127,7 +149,6 @@ void initGame()
     // ----- OpenGL settings -----
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Set out clear colour to black, full alpha
     glfwSwapInterval(1);        // Lock to vertical sync of monitor (normally 60Hz, so 60fps)
-    glShadeModel(GL_SMOOTH);    // Enable (gouraud) shading
     glEnable(GL_DEPTH_TEST);    // Enable depth testing
     glClearDepth(1.0f);         // Clear the entire depth of the depth buffer
     glDepthFunc(GL_LEQUAL);		// Set our depth function to overwrite if new value less than or equal to current value
@@ -135,31 +156,12 @@ void initGame()
     glEnable(GL_CULL_FACE); // Do not draw polygons facing away from us
     glLineWidth(2.0f);			// Set a 'chunky' line width
 
-    // ---- Set up OpenGL lighting -----
-    // Enable lighting
-    glEnable(GL_LIGHTING);
-    // Ambient, diffuse and specular lighting values (note that these are ALL FOUR COMPONENT VECTORS!)
-    GLfloat  ambientLight[] = { 0.2f, 0.2f, 0.2f, 1.0f };
-    GLfloat  diffuseLight[] = { 0.7f, 0.7f, 0.7f, 1.0f };
-    GLfloat specularLight[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-
-    GLint specularMagnitude = 64; // Define how "tight" our specular highlights are (larger number = smaller specular highlight). The valid range is is 1 to 128
-    // Setup and enable light 0
-    glLightfv(GL_LIGHT0, GL_POSITION, lightPos);          // Specify the position of the light
-    glLightfv(GL_LIGHT0, GL_AMBIENT,  ambientLight);      // Specify ambient light properties
-    glLightfv(GL_LIGHT0, GL_DIFFUSE,  diffuseLight);      // Specify diffuse light properties
-    glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);     // Specify specular light properties
-    glEnable(GL_LIGHT0);
-
+    //glDisable(GL_LIGHTING);
+    setLights();
     // Enable colour tracking of materials
     glEnable(GL_COLOR_MATERIAL);
-    // Define the shininess of the material we'll use to draw things
-    GLfloat materialSpecularReflectance[] = { 1.0f, 1.0f, 1.0f, 1.0f };
     // Set Material properties to follow glColor values
     glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-    // Use our shiny material and magnitude
-    glMaterialfv(GL_FRONT, GL_SPECULAR, materialSpecularReflectance);
-    glMateriali(GL_FRONT, GL_SHININESS, specularMagnitude);
 
     asteroids.push_back(new asteroid(modelObjs["asteroid1"],new point3D(50,0,50)    ,1000.0f,0.0f));
     asteroids.push_back(new asteroid(modelObjs["asteroid1"],new point3D(0,0,0,1,1,1),101.0f ,0.05f));
@@ -190,17 +192,40 @@ void handleMouseButton(GLFWwindow* window, int button, int action, int mods)
 // Function to set flags according to which keys are pressed or released
 void handleKeypress(GLFWwindow* window, int theKey, int scancode, int theAction, int mods)
 {
+    /*
+    2 = LEFT CTRL
+    4 = LEFT ALT
+    */
+    int lightMod = 2;
     // If a key is pressed, toggle the relevant key-press flag
     if (theAction == GLFW_PRESS || theAction == GLFW_REPEAT)
     {
         switch(theKey)
         {
-            case GLFW_KEY_W:            cameraFPS.setMoveForward(true);     break;
-            case GLFW_KEY_S:            cameraFPS.setMoveBackward(true);    break;
-            case GLFW_KEY_A:            cameraFPS.setMoveLeft(true);        break;
-            case GLFW_KEY_D:            cameraFPS.setMoveRight(true);       break;
-            case GLFW_KEY_SPACE:        cameraFPS.setMoveUp(true);          break;
-            case GLFW_KEY_LEFT_SHIFT:   cameraFPS.setMoveDown(true);        break;
+            case GLFW_KEY_W:
+                if(mods == lightMod) lightPos[2]+=0.5;
+                else cameraFPS.setMoveForward(true);
+                break;
+            case GLFW_KEY_S:
+                if(mods == lightMod) lightPos[2]-=0.5;
+                else cameraFPS.setMoveBackward(true);
+                break;
+            case GLFW_KEY_A:
+                if(mods == lightMod) lightPos[0]+=0.5;
+                else cameraFPS.setMoveLeft(true);
+                break;
+            case GLFW_KEY_D:
+                if(mods == lightMod) lightPos[0]-=0.5;
+                else cameraFPS.setMoveRight(true);
+                break;
+            case GLFW_KEY_SPACE:
+                if(mods == lightMod) lightPos[1]+=0.5;
+                else cameraFPS.setMoveUp(true);
+                break;
+            case GLFW_KEY_LEFT_SHIFT:
+                if(mods == lightMod) lightPos[1]-=0.5;
+                else cameraFPS.setMoveDown(true);
+                break;
             case GLFW_KEY_F1:           setFullScreen(!fullScreenMode);     break;
             case GLFW_KEY_ESCAPE:       glfwSetWindowShouldClose(window, true); break;
             default:
@@ -288,13 +313,15 @@ void drawScene()
     glLoadIdentity();
 
     cameraFPS.draw();
-
-    // Define our light position
-    // *** IMPORTANT! *** A light position takes a FOUR component vector! The last component is w! If you leave off the last component, you get NO LIGHT!!!
-    GLfloat newLightPos[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-
-    glLightfv(GL_LIGHT0, GL_POSITION, newLightPos);  // Place the light where the sun is!
-
+    setLights();
+    #ifdef LDEBUG
+    glTranslatef(lightPos[0],lightPos[1],lightPos[2]);
+    glDisable(GL_LIGHTING);
+    glColor3ub(255,255,255);
+    glutWireSphere(1,10,10);
+    glEnable(GL_LIGHTING);
+    glTranslatef(-lightPos[0],-lightPos[1],-lightPos[2]);
+    #endif
     //*
     // Draw the lower ground-grid
     drawGround();

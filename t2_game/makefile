@@ -7,6 +7,8 @@ SOURCE = *.cpp elements/*.cpp util/*.cpp
 
 default: mkout
 	$(BUILDER) $(SOURCE) $(CFLAGS) -o $(GNAME)
+debugLight: CFLAGS += -DLDEBUG
+debugLight: default
 mkbin:
 	mkdir -p $(OUTDIR)
 mkdmodels:
