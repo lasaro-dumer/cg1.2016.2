@@ -3,7 +3,7 @@ OUTDIR = bin
 MODELSOUT = $(OUTDIR)/data/models
 GNAME = $(OUTDIR)/spaceMission3
 BUILDER = g++
-SOURCE = *.cpp elements/*.cpp util/*.cpp
+SOURCE = *.cpp elements/*.cpp util/*.cpp util/helpers/*.cpp
 
 default: mkout
 	$(BUILDER) $(SOURCE) $(CFLAGS) -o $(GNAME)
