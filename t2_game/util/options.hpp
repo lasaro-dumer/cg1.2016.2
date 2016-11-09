@@ -14,6 +14,7 @@ private:
     string path = "options.ini";
     bool saved;
     bool fullscreen,fullscreenMaxSize;
+	bool useAmbient;
     int fullscreenWidth,fullscreenHeight;
     int windowedWidth,windowedHeight;
     GLfloat sensitivity,speed;
@@ -29,6 +30,7 @@ public:
         this->fullscreenHeight = 1920;
         this->windowedWidth = 600;
         this->windowedHeight = 800;
+		this->useAmbient = false;
         this->saved = false;
     }
     bool save(){
@@ -66,6 +68,8 @@ public:
                 this->windowedWidth = value;
     		}else if (strcmp(optName, "windowed.height") == 0 ){
                 this->windowedHeight = value;
+    		}else if (strcmp(optName, "ambient") == 0 ){
+                this->useAmbient = value;
     		}
             res = fscanf(file, "%s", optName);
         }
@@ -79,9 +83,11 @@ public:
     void setFullscreenHeight(bool value){ this->fullscreenHeight = value; this->saved=false;}
     void setWindowedWidth(bool value){ this->windowedWidth = value; this->saved=false;}
     void setWindowedHeight(bool value){ this->windowedHeight = value; this->saved=false;}
+    void setUseAmbientLight(bool value){ this->useAmbient = value; this->saved=false;}
     bool isSaved(){ return this->saved;}
     bool isFullscreen(){ return this->fullscreen;}
     bool isFullscreenMaxSize(){ return this->fullscreenMaxSize;}
+    bool useAmbientLight(){ return this->useAmbient;}
     int getMouseSensitivity(){ return this->sensitivity;}
     int getSpeed(){ return this->speed;}
     int getFullscreenWidth(){ return this->fullscreenWidth;}

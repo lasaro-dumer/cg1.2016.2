@@ -12,12 +12,14 @@ void asteroid::draw(){
 
     if(this->scaleFactor != 1){
         glScalef(this->scaleFactor,this->scaleFactor,this->scaleFactor);
-		//glutSolidSphere(20,100,100);
+		// glutSolidSphere(20,100,100);
+        // glutSolidCube(20);
         this->oModel->draw();
         GLfloat scaleRevert = 1/this->scaleFactor;
         glScalef(scaleRevert,scaleRevert,scaleRevert);
     }else{
-        //glutSolidSphere(20,100,100);
+        // glutSolidSphere(20,100,100);
+        // glutSolidCube(20);
         this->oModel->draw();
     }
 

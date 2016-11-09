@@ -10,9 +10,11 @@
 #include <stdio.h>
 #include <string>
 #include <cstring>
+#include "util/globals.hpp"
 #include "util/camera.hpp"
 #include "util/options.hpp"
 #include "util/smmath.hpp"
+#include "util/handlers.hpp"
 #include "elements/point3D.hpp"
 #include "elements/colorRgb.hpp"
 #include "elements/shoot.hpp"
@@ -21,27 +23,12 @@
 
 using namespace std;
 
-GLint windowWidth  = 1024;                    // Width of our window
-GLint windowHeight = 768;                    // Heightof our window
 GLint windowPosX   = 50;      // Windowed mode's top-left corner x
 GLint windowPosY   = 50;      // Windowed mode's top-left corner y
 
-GLint midWindowX = windowWidth  / 2;         // Middle of the window horizontally
-GLint midWindowY = windowHeight / 2;         // Middle of the window vertically
-
-bool fullScreenMode = false;
-
 GLFWwindow* gameWindow;
-
-// Set the light source location
-GLfloat  lightPos[] = { 2.0f, 2.0f, 10.0f, 1.0f };
-
-camera cameraFPS;
-
-map<string,modelObj*> modelObjs;
-list<shoot*> shoots;
-list<asteroid*> asteroids;
-
+// Ambient, diffuse and specular lighting values (note that these are ALL FOUR COMPONENT VECTORS!)
+GLfloat  ambientLight[4], diffuseLight[4], specularLight[4];
 char windowTitle[] = "Space Mission 3: Lost in Space";
 options gameOptions;
 // Function to check if OpenGL is having issues - pass it a unique string of some kind to track down where in the code it's moaning
@@ -66,41 +53,36 @@ void checkGLError(const char * errorLocation)
 }
 
 void setFullScreen(bool toFullScreen) {
-    if(fullScreenMode == toFullScreen)
+    if(globals::fullScreenMode == toFullScreen)
         return;
-    fullScreenMode = toFullScreen;
+    globals::fullScreenMode = toFullScreen;
 
     glfwGetWindowPos(gameWindow, &windowPosX, &windowPosY);
     GLFWmonitor* monitor = NULL;
-    if (fullScreenMode) {                     // Full-screen mode
+    if (globals::fullScreenMode) {                     // Full-screen mode
         monitor = glfwGetPrimaryMonitor();
         const GLFWvidmode* mode = glfwGetVideoMode(monitor);
         if(gameOptions.isFullscreenMaxSize()){
-            windowWidth = mode->width;
-            windowHeight = mode->height;
+            globals::windowWidth = mode->width;
+            globals::windowHeight = mode->height;
         }else{
-            windowWidth = gameOptions.getFullscreenWidth();
-            windowHeight = gameOptions.getFullscreenHeight();
+            globals::windowWidth = gameOptions.getFullscreenWidth();
+            globals::windowHeight = gameOptions.getFullscreenHeight();
         }
     } else {                                         // Windowed mode
-        windowWidth = gameOptions.getWindowedWidth();
-        windowHeight = gameOptions.getWindowedHeight();
+        globals::windowWidth = gameOptions.getWindowedWidth();
+        globals::windowHeight = gameOptions.getWindowedHeight();
     }
-    midWindowX = windowWidth  / 2;
-    midWindowY = windowHeight / 2;
-    std::cout << "setting windowWidth: " << windowWidth << " & windowHeight: " << windowHeight << std::endl;
-    glfwSetWindowMonitor(gameWindow,monitor,windowPosX,windowPosY,windowWidth,windowHeight,GLFW_DONT_CARE);
-    glfwSetWindowSize(gameWindow,windowWidth,windowHeight);
-    glViewport(0, 0, (GLsizei)windowWidth, (GLsizei)windowHeight);
-    cameraFPS.setPerspective(windowHeight,windowWidth);
+    globals::midWindowX = globals::windowWidth  / 2;
+    globals::midWindowY = globals::windowHeight / 2;
+    std::cout << "setting windowWidth: " << globals::windowWidth << " & windowHeight: " << globals::windowHeight << std::endl;
+    glfwSetWindowMonitor(gameWindow,monitor,windowPosX,windowPosY,globals::windowWidth,globals::windowHeight,GLFW_DONT_CARE);
+    glfwSetWindowSize(gameWindow,globals::windowWidth,globals::windowHeight);
+    glViewport(0, 0, (GLsizei)globals::windowWidth, (GLsizei)globals::windowHeight);
+    globals::cameraFPS->setPerspective(globals::windowHeight,globals::windowWidth);
 }
 
 void setLights() {
-    // Ambient, diffuse and specular lighting values (note that these are ALL FOUR COMPONENT VECTORS!)
-    GLfloat  ambientLight[] = { 0.2f, 0.2f, 0.2f, 1.0f };
-    GLfloat  diffuseLight[] = { 0.7f, 0.7f, 0.7f, 1.0f };
-    GLfloat specularLight[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-
     // ---- Set up OpenGL lighting -----
     glShadeModel(GL_SMOOTH);    // Enable (gouraud) shading
     // Use our shiny material and magnitude
@@ -115,7 +97,7 @@ void setLights() {
     glLightfv(GL_LIGHT0, GL_AMBIENT,  ambientLight);      // Specify ambient light properties
     glLightfv(GL_LIGHT0, GL_DIFFUSE,  diffuseLight);      // Specify diffuse light properties
     glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);     // Specify specular light properties
-    glLightfv(GL_LIGHT0, GL_POSITION, lightPos);          // Specify the position of the light
+    glLightfv(GL_LIGHT0, GL_POSITION, globals::lightPos);          // Specify the position of the light
     glEnable(GL_LIGHT0);
 }
 
@@ -124,15 +106,16 @@ void initGame()
     gameOptions.load();
 
     colorRgb* astColor = new colorRgb(160,100,20);
-    modelObjs["asteroid1"] = new modelObj(astColor,true);
-    modelObjs["asteroid1"]->loadFromFile("data/models/asteroid1.obj");
+    globals::modelObjs["asteroid1"] = new modelObj(astColor,true);
+    globals::modelObjs["asteroid1"]->loadFromFile("data/models/asteroid1.obj");
     //modelObjs["asteroid1"]->drawVolume = true;
-    modelObjs["shoot1"] = new modelObj(new colorRgb(255,60,0),true);
-    modelObjs["shoot1"]->loadFromFile("data/models/shoot1.obj");
+    globals::modelObjs["shoot1"] = new modelObj(new colorRgb(255,60,0),true);
+    globals::modelObjs["shoot1"]->loadFromFile("data/models/shoot1.obj");
     //modelObjs["shoot1"]->drawVolume = true;
 
-    cameraFPS.setMouseSensitivity(gameOptions.getMouseSensitivity());
-    cameraFPS.setSpeed(gameOptions.getSpeed());
+    globals::cameraFPS = new camera();
+    globals::cameraFPS->setMouseSensitivity(gameOptions.getMouseSensitivity());
+    globals::cameraFPS->setSpeed(gameOptions.getSpeed());
     setFullScreen(gameOptions.isFullscreen());
     // ----- GLFW Settings -----
     //glfwSetInputMode(gameWindow,GLFW_CURSOR,GLFW_CURSOR_DISABLED); // Hide the mouse cursor
@@ -140,8 +123,8 @@ void initGame()
     glfwSetCursor(gameWindow, cursor);
     // ----- Window and Projection Settings -----
     // Setup our viewport to be the entire size of the window
-    glViewport(0, 0, (GLsizei)windowWidth, (GLsizei)windowHeight);
-    cameraFPS.setPerspective(windowHeight,windowWidth);
+    glViewport(0, 0, (GLsizei)globals::windowWidth, (GLsizei)globals::windowHeight);
+    globals::cameraFPS->setPerspective(globals::windowHeight,globals::windowWidth);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -157,99 +140,45 @@ void initGame()
     glLineWidth(2.0f);			// Set a 'chunky' line width
 
     //glDisable(GL_LIGHTING);
+	// Ambient, diffuse and specular lighting values (note that these are ALL FOUR COMPONENT VECTORS!)
+    if(gameOptions.useAmbientLight()){
+        ambientLight[0] = 1.0f;
+        ambientLight[1] = 1.0f;
+        ambientLight[2] = 1.0f;
+        ambientLight[3] = 1.0f;
+
+        diffuseLight[0] = 0;
+        diffuseLight[1] = 0;
+        diffuseLight[2] = 0;
+        diffuseLight[3] = 1.0f;
+    }else{
+        ambientLight[0] = 0.2f;
+        ambientLight[1] = 0.2f;
+        ambientLight[2] = 0.2f;
+        ambientLight[3] = 1.0f;
+
+        diffuseLight[0] = 0.7f;
+        diffuseLight[1] = 0.7f;
+        diffuseLight[2] = 0.7f;
+        diffuseLight[3] = 1.0f;
+    }
+
+    specularLight[0] = 1.0f;
+    specularLight[1] = 1.0f;
+    specularLight[2] = 1.0f;
+    specularLight[3] = 1.0f;
+
     setLights();
     // Enable colour tracking of materials
     glEnable(GL_COLOR_MATERIAL);
     // Set Material properties to follow glColor values
     glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 
-    asteroids.push_back(new asteroid(modelObjs["asteroid1"],new point3D(50,0,50)    ,1000.0f,0.0f));
-    asteroids.push_back(new asteroid(modelObjs["asteroid1"],new point3D(0,0,0,1,1,1),101.0f ,0.05f));
+    globals::asteroids.push_back(new asteroid(globals::modelObjs["asteroid1"],new point3D(50,0,50)    ,1000.0f,0.0f));
+    globals::asteroids.push_back(new asteroid(globals::modelObjs["asteroid1"],new point3D(0,0,0,1,1,1),101.0f ,0.05f));
 
     // Check for any OpenGL errors (providing the location we called the function from)
     checkGLError("initGame");
-}
-
-// Function to deal with mouse position changes, called whenever the mouse cursorm moves
-void handleMouseMove(GLFWwindow* window, double mouseX, double mouseY)
-{
-    double horizMovement = mouseX - midWindowX;
-    double vertMovement  = mouseY - midWindowY;
-    cameraFPS.rotate(vertMovement,horizMovement);
-    // Reset the mouse position to the centre of the window each frame
-    glfwSetCursorPos(gameWindow, midWindowX, midWindowY);
-}
-
-void handleMouseButton(GLFWwindow* window, int button, int action, int mods)
-{
-    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
-        shoot* s = new shoot(cameraFPS.getCurrentPosition(),modelObjs["shoot1"],5);
-        s->setSpeed(0.25f);
-        shoots.push_back(s);
-    }
-}
-
-// Function to set flags according to which keys are pressed or released
-void handleKeypress(GLFWwindow* window, int theKey, int scancode, int theAction, int mods)
-{
-    /*
-    2 = LEFT CTRL
-    4 = LEFT ALT
-    */
-    int lightMod = 2;
-    // If a key is pressed, toggle the relevant key-press flag
-    if (theAction == GLFW_PRESS || theAction == GLFW_REPEAT)
-    {
-        switch(theKey)
-        {
-            case GLFW_KEY_W:
-                if(mods == lightMod) lightPos[2]+=0.5;
-                else cameraFPS.setMoveForward(true);
-                break;
-            case GLFW_KEY_S:
-                if(mods == lightMod) lightPos[2]-=0.5;
-                else cameraFPS.setMoveBackward(true);
-                break;
-            case GLFW_KEY_A:
-                if(mods == lightMod) lightPos[0]+=0.5;
-                else cameraFPS.setMoveLeft(true);
-                break;
-            case GLFW_KEY_D:
-                if(mods == lightMod) lightPos[0]-=0.5;
-                else cameraFPS.setMoveRight(true);
-                break;
-            case GLFW_KEY_SPACE:
-                if(mods == lightMod) lightPos[1]+=0.5;
-                else cameraFPS.setMoveUp(true);
-                break;
-            case GLFW_KEY_LEFT_SHIFT:
-                if(mods == lightMod) lightPos[1]-=0.5;
-                else cameraFPS.setMoveDown(true);
-                break;
-            case GLFW_KEY_F1:           setFullScreen(!fullScreenMode);     break;
-            case GLFW_KEY_ESCAPE:       glfwSetWindowShouldClose(window, true); break;
-            default:
-                /*Do nothing...*/
-                std::cout << "PRE KEY: " << theKey << std::endl;
-                break;
-        }
-    }
-    else // If a key is released, toggle the relevant key-release flag
-    {
-        switch(theKey)
-        {
-            case GLFW_KEY_W:            cameraFPS.setMoveForward(false);    break;
-            case GLFW_KEY_S:            cameraFPS.setMoveBackward(false);   break;
-            case GLFW_KEY_A:            cameraFPS.setMoveLeft(false);       break;
-            case GLFW_KEY_D:            cameraFPS.setMoveRight(false);      break;
-            case GLFW_KEY_SPACE:        cameraFPS.setMoveUp(false);          break;
-            case GLFW_KEY_LEFT_SHIFT:   cameraFPS.setMoveDown(false);        break;
-            default:
-                /*Do nothing...*/
-                std::cout << "REL KEY: " << theKey << std::endl;
-                break;
-        }
-    }
 }
 
 // Function to draw a grid of lines
@@ -303,6 +232,54 @@ void drawAxis(GLfloat lineLength) {
     glEnd();
 }
 
+void DesenhaChao(GLfloat TAM,GLfloat D,GLfloat Y)
+{
+	bool flagx, flagz;
+	glNormal3f(0,1,0);
+	glBegin(GL_QUADS);
+	flagx = false;
+	for(float x=-TAM; x<TAM; x+=D)
+	{
+		if(flagx) flagz = false;
+		else flagz = true;
+		for (float z=-TAM;z<TAM;z+=D)
+		{
+			if(flagz)
+				glColor3f(0.4,0.4,0.4);
+			else
+				glColor3f(1,1,1);
+			glVertex3f(x,Y,z+D);
+            glVertex3f(x+D,Y,z+D);
+            glVertex3f(x+D,Y,z);
+            glVertex3f(x,Y,z);
+			flagz = !flagz;
+		}
+		flagx = !flagx;
+	}
+	glEnd();
+}
+void drawStrokeText(char*s,int x,int y,int z)
+{
+    glPushMatrix();
+    glTranslatef(x, y+8,z);
+    glScalef(0.5f,0.5f,z);
+    // GLUT_STROKE_ROMAN
+    // GLUT_STROKE_MONO_ROMAN (fixed width font: 104.76 units wide).
+    for (int i=0; i<strlen(s); i++)
+    {
+        glutStrokeCharacter(GLUT_STROKE_ROMAN , s[i]);
+    }
+    glPopMatrix();
+}
+void drawTexts() {
+    char* text1 = "Hello world";
+    glColor3ub(0,200,00);
+    glRasterPos2f(5, 5);
+	for(int l=0; l<strlen(text1); l++)
+		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,text1[l]);
+    // drawStrokeText(text1,5,5,5);
+}
+
 // Function to draw our spheres and position the light source
 void drawScene()
 {
@@ -312,7 +289,11 @@ void drawScene()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    cameraFPS.draw();
+    globals::cameraFPS->draw();
+	point3D* p = globals::cameraFPS->getCurrentPosition();
+    globals::lightPos[0]=p->getX();
+    globals::lightPos[1]=p->getY();
+    globals::lightPos[2]=p->getZ();
     setLights();
     #ifdef LDEBUG
     glTranslatef(lightPos[0],lightPos[1],lightPos[2]);
@@ -322,7 +303,9 @@ void drawScene()
     glEnable(GL_LIGHTING);
     glTranslatef(-lightPos[0],-lightPos[1],-lightPos[2]);
     #endif
+    drawTexts();
     //*
+    //DesenhaChao(600,20,-10);
     // Draw the lower ground-grid
     drawGround();
     // Draw the upper ground-grid, keeping a copy of our current matrix on the stack before we translate it
@@ -335,30 +318,31 @@ void drawScene()
 
     list<shoot*>::iterator is;
     list<asteroid*>::iterator ia;
-    for (is = shoots.begin(); is != shoots.end(); ++is) {
+    for (is = globals::shoots.begin(); is != globals::shoots.end(); ++is) {
         if((*is)->isAlive()){
             (*is)->draw();
-            for (ia = asteroids.begin(); ia != asteroids.end(); ++ia) {
+            for (ia = globals::asteroids.begin(); ia != globals::asteroids.end(); ++ia) {
                 if((*ia)->isAlive())
                     (*is)->hitAsteroid((*ia));
             }
         }
         else
-            is = shoots.erase(is);
+            is = globals::shoots.erase(is);
     }
 
-    for (ia = asteroids.begin(); ia != asteroids.end(); ++ia) {
+    for (ia = globals::asteroids.begin(); ia != globals::asteroids.end(); ++ia) {
         if((*ia)->isAlive())
             (*ia)->draw();
         else{
             list<asteroid*> children = (*ia)->getChildren();
             list<asteroid*>::iterator ic;
             for (ic = children.begin(); ic != children.end(); ++ic) {
-                asteroids.push_back((*ic));
+                globals::asteroids.push_back((*ic));
             }
-            ia = asteroids.erase(ia);
+            ia = globals::asteroids.erase(ia);
         }
     }
+
     // ----- Stop Drawing Stuff! ------
     glfwSwapBuffers(gameWindow); // Swap the buffers to display the scene (so we don't have to watch it being drawn!)
     glfwPollEvents();
@@ -367,6 +351,16 @@ void drawScene()
 // Fire it up...
 int main(int argc, char **argv)
 {
+    globals::windowWidth  = 1024;                    // Width of our window
+    globals::windowHeight = 768;                    // Heightof our window
+    globals::midWindowX = globals::windowWidth  / 2;         // Middle of the window horizontally
+    globals::midWindowY = globals::windowHeight / 2;         // Middle of the window vertically
+    globals::fullScreenMode = false;
+    // Set the light source location
+    globals::lightPos[0] = 2.0f;
+    globals::lightPos[1] = 2.0f;
+    globals::lightPos[2] = 10.0f;
+    globals::lightPos[3] = 1.0f;
     // ----- Intialiase FreeGLUT -----
     // Note: We're only using freeGLUT to draw some spheres, so if you modify the code to not include any calls
     // to glutSolidSphere, then you don't need this, the header or the lib...
@@ -378,7 +372,7 @@ int main(int argc, char **argv)
     glfwWindowHint(GLFW_SAMPLES, 4);
 
     // Create a window
-    gameWindow = glfwCreateWindow(windowWidth,windowHeight,windowTitle, NULL, NULL);
+    gameWindow = glfwCreateWindow(globals::windowWidth,globals::windowHeight,windowTitle, NULL, NULL);
     if(gameWindow == NULL)
     {
         cout << "Failed to open window!" << endl;
@@ -386,7 +380,8 @@ int main(int argc, char **argv)
         return 0;
     }
     glfwMakeContextCurrent(gameWindow);
-    setFullScreen(fullScreenMode);// Will set viewport and camera perspective
+    setFullScreen(globals::fullScreenMode);// Will set viewport and camera perspective
+    globals::setFullScreen = setFullScreen;
     // ----- Initialise GLEE -----
     // Initialise GLee once we've got a rendering context
     // Note: We don't really have to do this because it's called automatically, but if we do it - we KNOW it's been called!
@@ -404,7 +399,7 @@ int main(int argc, char **argv)
         glEnable(GL_LINE_SMOOTH);
 
     // Set the mouse cursor to the centre of our window
-    glfwSetCursorPos(gameWindow,midWindowX, midWindowY);
+    glfwSetCursorPos(gameWindow,globals::midWindowX, globals::midWindowY);
     // Call our initGame function to set up our OpenGL options
     initGame();
     // Specify the function which should execute when a key is pressed or released
@@ -419,7 +414,7 @@ int main(int argc, char **argv)
         // Draw our scene
         drawScene();
         // Move our camera
-        cameraFPS.move();
+        globals::cameraFPS->move();
         // Check for any OpenGL errors (providing the location we called the function from)
         checkGLError("Main loop");
     }
