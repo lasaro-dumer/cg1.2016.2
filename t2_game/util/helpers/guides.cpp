@@ -23,7 +23,28 @@ void drawGround()
     glEnd();
 }
 
-void drawAxis(GLfloat lineLength) {
+void draw2DAxis(GLfloat lineLength) {
+    glBegin(GL_LINES);
+        //Red positive X-Axis
+        glColor3f(1.0f, 0.0f, 0.0f);
+        glVertex2f(0,0);
+        glVertex2f(lineLength,0);
+        for (GLfloat i = 0; i > -lineLength; i=i-0.20f) {
+            glVertex2f(i,0);
+            glVertex2f(i-0.10f,0);
+        }
+        //Blue positive Y-Axis
+        glColor3f(0.0f, 0.0f, 1.0f);
+        glVertex2f(0,0);
+        glVertex2f(0,lineLength);
+		for (GLfloat i = 0; i > -lineLength; i=i-0.20f) {
+            glVertex2f(0,i);
+            glVertex2f(0,i-0.10f);
+        }
+    glEnd();
+}
+
+void draw3DAxis(GLfloat lineLength) {
     glBegin(GL_LINES);
         //Red positive X-Axis
         glColor3f(1.0f, 0.0f, 0.0f);

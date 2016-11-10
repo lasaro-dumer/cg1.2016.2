@@ -196,7 +196,7 @@ void drawStrokeText(char*s,int x,int y,int z)
     glPopMatrix();
 }
 void drawTexts() {
-    char* text1 = "Hello world";
+    const char* text1 = "Hello world";
     glColor3ub(0,200,00);
     glRasterPos2f(5, 5);
 	for(int l=0; l<strlen(text1); l++)
@@ -238,7 +238,7 @@ void drawScene()
     drawGround();
     glPopMatrix();
 
-    drawAxis(300);
+    draw3DAxis(300);
 
     list<shoot*>::iterator is;
     list<asteroid*>::iterator ia;
@@ -266,6 +266,50 @@ void drawScene()
             ia = globals::asteroids.erase(ia);
         }
     }
+
+    // ----- Stop Drawing Stuff! ------
+    glfwSwapBuffers(gameWindow); // Swap the buffers to display the scene (so we don't have to watch it being drawn!)
+    glfwPollEvents();
+}
+
+void drawPaused() {
+    GLfloat aspect = (GLfloat)globals::windowWidth / (GLfloat)globals::windowHeight;
+    // Projection clipping area
+    GLdouble clipAreaXLeft, clipAreaXRight, clipAreaYBottom, clipAreaYTop;
+    // Set the aspect ratio of the clipping area to match the viewport
+    glMatrixMode(GL_PROJECTION);  // To operate on the Projection matrix
+    glLoadIdentity();             // Reset the projection matrix
+    if (globals::windowWidth >= globals::windowHeight) {
+       clipAreaXLeft   = -1.0 * aspect;
+       clipAreaXRight  = 1.0 * aspect;
+       clipAreaYBottom = -1.0;
+       clipAreaYTop    = 1.0;
+    } else {
+       clipAreaXLeft   = -1.0;
+       clipAreaXRight  = 1.0;
+       clipAreaYBottom = -1.0 / aspect;
+       clipAreaYTop    = 1.0 / aspect;
+    }
+    gluOrtho2D(clipAreaXLeft, clipAreaXRight, clipAreaYBottom, clipAreaYTop);
+
+    // Clear the screen and depth buffer
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    // Reset the matrix
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    const char* text1 = "PAUSED";
+    glColor3ub(0,200,0);
+    glRasterPos2f(-0.1, 0);
+	for(int l=0; l<strlen(text1); l++)
+		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,text1[l]);
+
+    draw2DAxis(2);
+    // glBegin(GL_LINES);
+    //     glColor3ub(200,200,0);
+    //     glVertex2f(-0.1, 0.1);
+    //     glVertex2f( 0.1, 0.1);
+    // glEnd();
 
     // ----- Stop Drawing Stuff! ------
     glfwSwapBuffers(gameWindow); // Swap the buffers to display the scene (so we don't have to watch it being drawn!)
@@ -333,12 +377,17 @@ int main(int argc, char **argv)
     // Specify the function which should execute when a mouse button is pressed or released
     glfwSetMouseButtonCallback(gameWindow, handleMouseButton);
 
+    globals::paused = false;
     while (!glfwWindowShouldClose(gameWindow))
     {
-        // Draw our scene
-        drawScene();
-        // Move our camera
-        globals::cameraFPS->move();
+        if(globals::paused){
+            drawPaused();
+        }else{
+            // Draw our scene
+            drawScene();
+            // Move our camera
+            globals::cameraFPS->move();
+        }
         // Check for any OpenGL errors (providing the location we called the function from)
         checkGLError("Main loop");
     }

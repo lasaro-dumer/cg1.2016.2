@@ -7,16 +7,18 @@
 // Function to deal with mouse position changes, called whenever the mouse cursorm moves
 void handleMouseMove(GLFWwindow* window, double mouseX, double mouseY)
 {
-    double horizMovement = mouseX - globals::midWindowX;
-    double vertMovement  = mouseY - globals::midWindowY;
-    globals::cameraFPS->rotate(vertMovement,horizMovement);
-    // Reset the mouse position to the centre of the window each frame
-    glfwSetCursorPos(window, globals::midWindowX, globals::midWindowY);
+    if(!globals::paused){
+        double horizMovement = mouseX - globals::midWindowX;
+        double vertMovement  = mouseY - globals::midWindowY;
+        globals::cameraFPS->rotate(vertMovement,horizMovement);
+        // Reset the mouse position to the centre of the window each frame
+        glfwSetCursorPos(window, globals::midWindowX, globals::midWindowY);
+    }
 }
 
 void handleMouseButton(GLFWwindow* window, int button, int action, int mods)
 {
-    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
+    if (!globals::paused && button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
         shoot* s = new shoot(globals::cameraFPS->getCurrentPosition(),globals::modelObjs["shoot1"],5);
         s->setSpeed(0.25f);
         globals::shoots.push_back(s);
@@ -62,6 +64,13 @@ void handleKeypress(GLFWwindow* window, int theKey, int scancode, int theAction,
                 break;
             case GLFW_KEY_F1:           globals::setFullScreen(!globals::fullScreenMode);     break;
             case GLFW_KEY_ESCAPE:       glfwSetWindowShouldClose(window, true); break;
+			case GLFW_KEY_P:
+                if(globals::paused){
+                    glfwSetCursorPos(window, globals::midWindowX, globals::midWindowY);
+                    globals::cameraFPS->setPerspective(globals::windowHeight,globals::windowWidth);
+                }
+                globals::paused = !globals::paused;
+                break;
             default:
                 /*Do nothing...*/
                 std::cout << "PRE KEY: " << theKey << std::endl;

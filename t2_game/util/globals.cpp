@@ -16,3 +16,4 @@ list<asteroid*> globals::asteroids;
 GLfloat globals::lightPos[4];
 bool globals::fullScreenMode;
 setFullScreenfun globals::setFullScreen;
+bool globals::paused;

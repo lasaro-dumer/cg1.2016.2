@@ -22,23 +22,6 @@ public:
 	static GLfloat  lightPos[];
 	static bool fullScreenMode;
 	static setFullScreenfun setFullScreen;
-	// static void setCameraFPS(camera* c) { cameraFPS = c; }
-	// static void setWindowWidth(GLint ww) {
-	// 	windowWidth = ww;
-	// 	midWindowX = ww / 2;
-	// }
-	// static void setWindowHeight(GLint wh) {
-	// 	windowHeight = wh;
-	// 	midWindowY = wh / 2;
-	// }
-	// static void putModelObj(string name,modelObj* model) {
-	// 	modelObjs[name] = model;
-	// }
-	// static camera* getCameraFPS(){ return cameraFPS; }
-	// static GLint getWindowWidth(){ return windowWidth; }
-	// static GLint getWindowHeight(){ return windowHeight; }
-	// static GLfloat getMidWindowX(){ return midWindowX; }
-	// static GLfloat getMidWindowY(){ return midWindowY; }
-	// static modelObj* getModelObj(string name){ return modelObjs[name]; }
+	static bool paused;
 };
 #endif
