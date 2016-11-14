@@ -1,6 +1,7 @@
 #ifndef globalsH
 #define globalsH
 #include <map>
+#include "text.hpp"
 #include "camera.hpp"
 #include "../elements/modelObj.hpp"
 #include "../elements/shoot.hpp"
@@ -11,6 +12,7 @@ typedef void (* setFullScreenfun)(bool);
 class globals {
 private:
 public:
+	static text* textHandler;
 	static camera* cameraFPS;
 	static GLint windowWidth;
 	static GLint windowHeight;
@@ -22,6 +24,7 @@ public:
 	static GLfloat  lightPos[];
 	static bool fullScreenMode;
 	static setFullScreenfun setFullScreen;
+	static bool started;
 	static bool paused;
 };
 #endif

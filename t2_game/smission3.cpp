@@ -3,6 +3,7 @@
 #include <GLee.h>         // No need to link to GL/gl.h
 #include <GLFW/glfw3.h>      // Include OpenGL Framework library
 #include <GL/freeglut.h>  // Include FreeGLUT so we can easily draw spheres and calculate our viewing frustrum
+#include <SOIL.h>
 #include <math.h>         // Used only for sin() and cos() functions
 #include <list>
 #include <map>
@@ -152,7 +153,8 @@ void initGame()
         diffuseLight[1] = 0;
         diffuseLight[2] = 0;
         diffuseLight[3] = 1.0f;
-    }else{
+    }
+    else{
         ambientLight[0] = 0.2f;
         ambientLight[1] = 0.2f;
         ambientLight[2] = 0.2f;
@@ -205,8 +207,7 @@ void drawTexts() {
 }
 
 // Function to draw our spheres and position the light source
-void drawScene()
-{
+void drawScene(){
     // Clear the screen and depth buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     // Reset the matrix
@@ -316,9 +317,63 @@ void drawPaused() {
     glfwPollEvents();
 }
 
+void drawMain() {
+    GLfloat aspect = (GLfloat)globals::windowWidth / (GLfloat)globals::windowHeight;
+    // Projection clipping area
+    GLdouble clipAreaXLeft, clipAreaXRight, clipAreaYBottom, clipAreaYTop;
+    // Set the aspect ratio of the clipping area to match the viewport
+    glMatrixMode(GL_PROJECTION);  // To operate on the Projection matrix
+    glLoadIdentity();             // Reset the projection matrix
+    GLfloat zoom = 0.45f;
+    if (globals::windowWidth >= globals::windowHeight) {
+       clipAreaXLeft   = -zoom * aspect;
+       clipAreaXRight  = zoom * aspect;
+       clipAreaYBottom = -zoom;
+       clipAreaYTop    = zoom;
+    } else {
+       clipAreaXLeft   = -zoom;
+       clipAreaXRight  = zoom;
+       clipAreaYBottom = -zoom / aspect;
+       clipAreaYTop    = zoom / aspect;
+    }
+    gluOrtho2D(clipAreaXLeft, clipAreaXRight, clipAreaYBottom, clipAreaYTop);
+
+    // glTranslatef(-0.6,0,0);
+    //glDisable(GL_DEPTH_TEST);
+    globals::textHandler->drawText("Press SPACE to start", new point3D(-0.58f,-0.05f,0));
+    // glEnable(GL_DEPTH_TEST);
+    // Clear the screen and depth buffer
+    // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    // // // Reset the matrix
+    // glMatrixMode(GL_MODELVIEW);
+    // glLoadIdentity();
+    //
+    // const char* text1 = "PRESS SPACE";
+    // glColor3ub(0,200,0);
+    // glRasterPos2f(-0.1, 0);
+	// for(int l=0; l<strlen(text1); l++)
+	// 	glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,text1[l]);
+    //
+    // draw2DAxis(2,-1);
+    //
+    // glBegin(GL_LINES);
+    //     glColor3ub(200,200,0);
+    //     glVertex2f(-0.1, 0.1);
+    //     glVertex2f( 0.1, 0.1);
+    // glEnd();
+
+    //globals::textHandler->drawText("Test: <>,.;:()!@#$%&*-+\\|/'\"");
+    // globals::textHandler->drawText("AaBbCcDdEeFfGgHhIiJjKkLl");
+
+    // ----- Stop Drawing Stuff! ------
+    glfwSwapBuffers(gameWindow); // Swap the buffers to display the scene (so we don't have to watch it being drawn!)
+    glfwPollEvents();
+}
+
 // Fire it up...
 int main(int argc, char **argv)
 {
+    globals::textHandler = text::getMonospace();
     globals::windowWidth  = 1024;                    // Width of our window
     globals::windowHeight = 768;                    // Heightof our window
     globals::midWindowX = globals::windowWidth  / 2;         // Middle of the window horizontally
@@ -370,12 +425,24 @@ int main(int argc, char **argv)
     glfwSetCursorPos(gameWindow,globals::midWindowX, globals::midWindowY);
     // Call our initGame function to set up our OpenGL options
     initGame();
-    // Specify the function which should execute when a key is pressed or released
-    glfwSetKeyCallback(gameWindow,handleKeypress);
     // Specify the function which should execute when the mouse is moved
     glfwSetCursorPosCallback(gameWindow,handleMouseMove);
     // Specify the function which should execute when a mouse button is pressed or released
     glfwSetMouseButtonCallback(gameWindow, handleMouseButton);
+
+    globals::started = false;
+    globals::paused = true;
+	glfwSetKeyCallback(gameWindow,handleKeypressMenu);
+    // glDisable(GL_DEPTH_TEST);
+    while (!glfwWindowShouldClose(gameWindow) && !globals::started)
+    {
+        drawMain();
+        // Check for any OpenGL errors (providing the location we called the function from)
+        checkGLError("Main loop");
+    }
+    glEnable(GL_DEPTH_TEST);
+	// Specify the function which should execute when a key is pressed or released
+	glfwSetKeyCallback(gameWindow,handleKeypress);
 
     globals::paused = false;
     while (!glfwWindowShouldClose(gameWindow))

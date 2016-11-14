@@ -3,8 +3,10 @@
 #include <map>
 #include <list>
 #include "../elements/shoot.hpp"
+#include "text.hpp"
 #include "globals.hpp"
 
+text* globals::textHandler;
 camera* globals::cameraFPS;
 GLint globals::windowWidth;
 GLint globals::windowHeight;
@@ -16,4 +18,5 @@ list<asteroid*> globals::asteroids;
 GLfloat globals::lightPos[4];
 bool globals::fullScreenMode;
 setFullScreenfun globals::setFullScreen;
+bool globals::started;
 bool globals::paused;

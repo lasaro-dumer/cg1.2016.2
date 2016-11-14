@@ -64,7 +64,7 @@ void handleKeypress(GLFWwindow* window, int theKey, int scancode, int theAction,
                 break;
             case GLFW_KEY_F1:           globals::setFullScreen(!globals::fullScreenMode);     break;
             case GLFW_KEY_ESCAPE:       glfwSetWindowShouldClose(window, true); break;
-			case GLFW_KEY_P:
+            case GLFW_KEY_P:
                 if(globals::paused){
                     glfwSetCursorPos(window, globals::midWindowX, globals::midWindowY);
                     globals::cameraFPS->setPerspective(globals::windowHeight,globals::windowWidth);
@@ -90,6 +90,31 @@ void handleKeypress(GLFWwindow* window, int theKey, int scancode, int theAction,
             default:
                 /*Do nothing...*/
                 std::cout << "REL KEY: " << theKey << std::endl;
+                break;
+        }
+    }
+}
+
+// Function to set flags according to which keys are pressed or released
+void handleKeypressMenu(GLFWwindow* window, int theKey, int scancode, int theAction, int mods)
+{
+    // If a key is pressed, toggle the relevant key-press flag
+    if (theAction == GLFW_PRESS || theAction == GLFW_REPEAT)
+    {
+        switch(theKey)
+        {
+            case GLFW_KEY_SPACE:
+                if(!globals::started){
+                    globals::started = true;
+                    glfwSetCursorPos(window, globals::midWindowX, globals::midWindowY);
+                    globals::cameraFPS->setPerspective(globals::windowHeight,globals::windowWidth);
+                }
+                break;
+            case GLFW_KEY_F1:           globals::setFullScreen(!globals::fullScreenMode);     break;
+            case GLFW_KEY_ESCAPE:       glfwSetWindowShouldClose(window, true); break;
+            default:
+                /*Do nothing...*/
+                std::cout << "PRE KEY: " << theKey << std::endl;
                 break;
         }
     }
