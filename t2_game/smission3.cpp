@@ -100,8 +100,11 @@ void initGame()
     // Set Material properties to follow glColor values
     glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 
-    globals::asteroids.push_back(new asteroid(globals::modelObjs["asteroid1"],new point3D(50,0,50)    ,1000.0f,0.0f));
-    globals::asteroids.push_back(new asteroid(globals::modelObjs["asteroid1"],new point3D(0,0,0,1,1,1),101.0f ,0.05f));
+    globals::asteroids.push_back(new asteroid(globals::modelObjs["asteroid1"],new point3D(50,40,50,0.5f,0,0),1000.0f,0.5f));
+    asteroid* ast1 = new asteroid(globals::modelObjs["asteroid1"],new point3D(0,0,0),1000.0f, 0.05f,100,150);
+    globals::asteroids.push_back(ast1);
+    asteroid* ast2 = new asteroid(globals::modelObjs["asteroid1"],ast1->getPosition(),800.0f ,0.5f,20,20);
+    globals::asteroids.push_back(ast2);
 
     // Check for any OpenGL errors (providing the location we called the function from)
     checkGLError("initGame");

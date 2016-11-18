@@ -15,14 +15,15 @@ private:
     GLfloat hitPoints;
     list<asteroid*> children;
 public:
-    asteroid (modelObj* mObj, point3D* pos, GLfloat m,GLfloat s):baseElement(pos,mObj->getColor(),s){
+    asteroid (modelObj* mObj, point3D* pos, GLfloat m, GLfloat s):baseElement(pos,mObj->getColor(),s){
         this->oModel = mObj;
         this->mass = m;
         this->scaleFactor = (this->mass/baseMass);
         this->calculateMovementForward();
         this->hitPoints = 10;
     }
-    asteroid (modelObj* mObj, point3D* pos, GLfloat m):asteroid(mObj,pos,m,defaultSpeed){
+    asteroid (modelObj* mObj, point3D* pos, GLfloat m, GLfloat s, GLfloat ma, GLfloat mi=-1):asteroid(mObj,pos,m,s){
+        this->setCircularMovement(pos,ma,mi);
     }
     void draw();
     void takeHit(GLfloat damage);

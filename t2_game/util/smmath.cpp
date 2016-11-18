@@ -33,3 +33,11 @@ GLfloat meanRadius(point3D* center, vector<point3D*> vertices){
     }
     return dSum/count;
 }
+
+point3D* positionInCircle(point3D* center, GLfloat orbitPoint, GLfloat major, GLfloat minor) {
+		//majorR*sin(2*pi*orbitPoint),0,minorR*cos(2*pi*orbitPoint)
+        GLfloat x = major*sin(2*PI*orbitPoint);
+        GLfloat y = 0;
+        GLfloat z = minor*cos(2*PI*orbitPoint);
+		return new point3D(center->getX()+x, center->getY()+y, center->getZ()+z);
+}

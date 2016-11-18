@@ -3,6 +3,7 @@
 #include <random>
 #include <GLee.h>
 #include <GL/freeglut.h>
+#include "../util/smmath.hpp"
 #include "modelObj.hpp"
 #include "baseElement.hpp"
 #include "asteroid.hpp"
@@ -39,7 +40,8 @@ void asteroid::takeHit(GLfloat damage){
                 GLfloat radius = 0;
                 if(!startInCenter)
                     radius = this->getRadius()*2;
-                GLfloat cSpeed = this->speedFactor*1.05f;
+                GLfloat bSpeed = (this->speedFactor > 0.05f) ? 0.05f : this->speedFactor;
+                GLfloat cSpeed = bSpeed * 1.05f;//5% faster
                 if(cSpeed == 0)
                     cSpeed = 0.05f;
                 std::default_random_engine generator;

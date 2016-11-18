@@ -46,6 +46,14 @@ public:
     void draw(){
         glVertex3f(this->x,this->y,this->z);
     }
+	void update(point3D* newPos) {
+		this->setX(newPos->getX());
+		this->setY(newPos->getY());
+		this->setZ(newPos->getZ());
+		this->setXRot(newPos->getXRot());
+		this->setYRot(newPos->getYRot());
+		this->setZRot(newPos->getZRot());
+	}
     string toString(){
         stringstream ss;
         ss << "("<<this->x<<","<<this->y<<","<<this->z<<")@("<<this->xr<<","<<this->yr<<","<<this->zr<<")";
