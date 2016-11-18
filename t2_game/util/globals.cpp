@@ -4,6 +4,7 @@
 #include <list>
 #include "../elements/shoot.hpp"
 #include "text.hpp"
+#include "options.hpp"
 #include "globals.hpp"
 
 text* globals::textHandler;
@@ -20,3 +21,10 @@ bool globals::fullScreenMode;
 setFullScreenfun globals::setFullScreen;
 bool globals::started;
 bool globals::paused;
+GLint globals::windowPosX   = 50;
+GLint globals::windowPosY   = 50;
+GLFWwindow* globals::gameWindow;
+GLfloat globals::ambientLight[4];
+GLfloat globals::diffuseLight[4];
+GLfloat globals::specularLight[4];
+options globals::gameOptions;

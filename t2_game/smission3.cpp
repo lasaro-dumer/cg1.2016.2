@@ -12,6 +12,7 @@
 #include <string>
 #include <cstring>
 #include "util/globals.hpp"
+#include "util/glhelp.hpp"
 #include "util/camera.hpp"
 #include "util/options.hpp"
 #include "util/smmath.hpp"
@@ -25,87 +26,9 @@
 
 using namespace std;
 
-GLint windowPosX   = 50;      // Windowed mode's top-left corner x
-GLint windowPosY   = 50;      // Windowed mode's top-left corner y
-
-GLFWwindow* gameWindow;
-// Ambient, diffuse and specular lighting values (note that these are ALL FOUR COMPONENT VECTORS!)
-GLfloat  ambientLight[4], diffuseLight[4], specularLight[4];
-char windowTitle[] = "Space Mission 3: Lost in Space";
-options gameOptions;
-// Function to check if OpenGL is having issues - pass it a unique string of some kind to track down where in the code it's moaning
-void checkGLError(const char * errorLocation)
-{
-    unsigned int gle = glGetError();
-    if (gle != GL_NO_ERROR)
-    {
-        cout << "GL Error discovered from caller " << errorLocation << ": ";
-        switch (gle)
-        {
-            case GL_INVALID_ENUM:       cout << "Invalid enum."; break;
-            case GL_INVALID_VALUE:      cout << "Invalid value."; break;
-            case GL_INVALID_OPERATION:  cout << "Invalid Operation."; break;
-            case GL_STACK_OVERFLOW:     cout << "Stack overflow."; break;
-            case GL_STACK_UNDERFLOW:    cout << "Stack underflow."; break;
-            case GL_OUT_OF_MEMORY:      cout << "Out of memory."; break;
-            default:                    cout << "Unknown error! Enum code is: " << gle; break;
-        }
-        cout << endl;
-    }
-}
-
-void setFullScreen(bool toFullScreen) {
-    if(globals::fullScreenMode == toFullScreen)
-        return;
-    globals::fullScreenMode = toFullScreen;
-
-    glfwGetWindowPos(gameWindow, &windowPosX, &windowPosY);
-    GLFWmonitor* monitor = NULL;
-    if (globals::fullScreenMode) {                     // Full-screen mode
-        monitor = glfwGetPrimaryMonitor();
-        const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-        if(gameOptions.isFullscreenMaxSize()){
-            globals::windowWidth = mode->width;
-            globals::windowHeight = mode->height;
-        }else{
-            globals::windowWidth = gameOptions.getFullscreenWidth();
-            globals::windowHeight = gameOptions.getFullscreenHeight();
-        }
-    } else {                                         // Windowed mode
-        globals::windowWidth = gameOptions.getWindowedWidth();
-        globals::windowHeight = gameOptions.getWindowedHeight();
-    }
-    globals::midWindowX = globals::windowWidth  / 2;
-    globals::midWindowY = globals::windowHeight / 2;
-    std::cout << "setting windowWidth: " << globals::windowWidth << " & windowHeight: " << globals::windowHeight << std::endl;
-    glfwSetWindowMonitor(gameWindow,monitor,windowPosX,windowPosY,globals::windowWidth,globals::windowHeight,GLFW_DONT_CARE);
-    glfwSetWindowSize(gameWindow,globals::windowWidth,globals::windowHeight);
-    glViewport(0, 0, (GLsizei)globals::windowWidth, (GLsizei)globals::windowHeight);
-    globals::cameraFPS->setPerspective(globals::windowHeight,globals::windowWidth);
-}
-
-void setLights() {
-    // ---- Set up OpenGL lighting -----
-    glShadeModel(GL_SMOOTH);    // Enable (gouraud) shading
-    // Use our shiny material and magnitude
-    // Define the shininess of the material we'll use to draw things
-    GLfloat materialSpecularReflectance[] = { 0, 0, 0, 1.0f };
-    glMaterialfv(GL_FRONT, GL_SPECULAR, materialSpecularReflectance);
-    GLint specularMagnitude = 128; // Define how "tight" our specular highlights are (larger number = smaller specular highlight). The valid range is is 1 to 128
-    glMateriali(GL_FRONT, GL_SHININESS, specularMagnitude);
-    // Enable lighting
-    glEnable(GL_LIGHTING);
-    // Setup and enable light 0
-    glLightfv(GL_LIGHT0, GL_AMBIENT,  ambientLight);      // Specify ambient light properties
-    glLightfv(GL_LIGHT0, GL_DIFFUSE,  diffuseLight);      // Specify diffuse light properties
-    glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);     // Specify specular light properties
-    glLightfv(GL_LIGHT0, GL_POSITION, globals::lightPos);          // Specify the position of the light
-    glEnable(GL_LIGHT0);
-}
-
 void initGame()
 {
-    gameOptions.load();
+    globals::gameOptions.load();
 
     colorRgb* astColor = new colorRgb(160,100,20);
     globals::modelObjs["asteroid1"] = new modelObj(astColor,true);
@@ -116,13 +39,13 @@ void initGame()
     //modelObjs["shoot1"]->drawVolume = true;
 
     globals::cameraFPS = new camera();
-    globals::cameraFPS->setMouseSensitivity(gameOptions.getMouseSensitivity());
-    globals::cameraFPS->setSpeed(gameOptions.getSpeed());
-    setFullScreen(gameOptions.isFullscreen());
+    globals::cameraFPS->setMouseSensitivity(globals::gameOptions.getMouseSensitivity());
+    globals::cameraFPS->setSpeed(globals::gameOptions.getSpeed());
+    setFullScreen(globals::gameOptions.isFullscreen());
     // ----- GLFW Settings -----
     //glfwSetInputMode(gameWindow,GLFW_CURSOR,GLFW_CURSOR_DISABLED); // Hide the mouse cursor
     GLFWcursor* cursor = glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR);
-    glfwSetCursor(gameWindow, cursor);
+    glfwSetCursor(globals::gameWindow, cursor);
     // ----- Window and Projection Settings -----
     // Setup our viewport to be the entire size of the window
     glViewport(0, 0, (GLsizei)globals::windowWidth, (GLsizei)globals::windowHeight);
@@ -143,33 +66,33 @@ void initGame()
 
     //glDisable(GL_LIGHTING);
 	// Ambient, diffuse and specular lighting values (note that these are ALL FOUR COMPONENT VECTORS!)
-    if(gameOptions.useAmbientLight()){
-        ambientLight[0] = 1.0f;
-        ambientLight[1] = 1.0f;
-        ambientLight[2] = 1.0f;
-        ambientLight[3] = 1.0f;
+    if(globals::gameOptions.useAmbientLight()){
+        globals::ambientLight[0] = 1.0f;
+        globals::ambientLight[1] = 1.0f;
+        globals::ambientLight[2] = 1.0f;
+        globals::ambientLight[3] = 1.0f;
 
-        diffuseLight[0] = 0;
-        diffuseLight[1] = 0;
-        diffuseLight[2] = 0;
-        diffuseLight[3] = 1.0f;
+        globals::diffuseLight[0] = 0;
+        globals::diffuseLight[1] = 0;
+        globals::diffuseLight[2] = 0;
+        globals::diffuseLight[3] = 1.0f;
     }
     else{
-        ambientLight[0] = 0.2f;
-        ambientLight[1] = 0.2f;
-        ambientLight[2] = 0.2f;
-        ambientLight[3] = 1.0f;
+        globals::ambientLight[0] = 0.2f;
+        globals::ambientLight[1] = 0.2f;
+        globals::ambientLight[2] = 0.2f;
+        globals::ambientLight[3] = 1.0f;
 
-        diffuseLight[0] = 0.7f;
-        diffuseLight[1] = 0.7f;
-        diffuseLight[2] = 0.7f;
-        diffuseLight[3] = 1.0f;
+        globals::diffuseLight[0] = 0.7f;
+        globals::diffuseLight[1] = 0.7f;
+        globals::diffuseLight[2] = 0.7f;
+        globals::diffuseLight[3] = 1.0f;
     }
 
-    specularLight[0] = 1.0f;
-    specularLight[1] = 1.0f;
-    specularLight[2] = 1.0f;
-    specularLight[3] = 1.0f;
+    globals::specularLight[0] = 1.0f;
+    globals::specularLight[1] = 1.0f;
+    globals::specularLight[2] = 1.0f;
+    globals::specularLight[3] = 1.0f;
 
     setLights();
     // Enable colour tracking of materials
@@ -182,28 +105,6 @@ void initGame()
 
     // Check for any OpenGL errors (providing the location we called the function from)
     checkGLError("initGame");
-}
-
-void drawStrokeText(char*s,int x,int y,int z)
-{
-    glPushMatrix();
-    glTranslatef(x, y+8,z);
-    glScalef(0.5f,0.5f,z);
-    // GLUT_STROKE_ROMAN
-    // GLUT_STROKE_MONO_ROMAN (fixed width font: 104.76 units wide).
-    for (int i=0; i<strlen(s); i++)
-    {
-        glutStrokeCharacter(GLUT_STROKE_ROMAN , s[i]);
-    }
-    glPopMatrix();
-}
-void drawTexts() {
-    const char* text1 = "Hello world";
-    glColor3ub(0,200,00);
-    glRasterPos2f(5, 5);
-	for(int l=0; l<strlen(text1); l++)
-		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,text1[l]);
-    // drawStrokeText(text1,5,5,5);
 }
 
 // Function to draw our spheres and position the light source
@@ -228,7 +129,6 @@ void drawScene(){
     glEnable(GL_LIGHTING);
     glTranslatef(-lightPos[0],-lightPos[1],-lightPos[2]);
     #endif
-    drawTexts();
     //*
     //drawCheesGrid(600,20,-10);
     // Draw the lower ground-grid
@@ -269,104 +169,21 @@ void drawScene(){
     }
 
     // ----- Stop Drawing Stuff! ------
-    glfwSwapBuffers(gameWindow); // Swap the buffers to display the scene (so we don't have to watch it being drawn!)
+    glfwSwapBuffers(globals::gameWindow); // Swap the buffers to display the scene (so we don't have to watch it being drawn!)
     glfwPollEvents();
 }
 
 void drawPaused() {
-    GLfloat aspect = (GLfloat)globals::windowWidth / (GLfloat)globals::windowHeight;
-    // Projection clipping area
-    GLdouble clipAreaXLeft, clipAreaXRight, clipAreaYBottom, clipAreaYTop;
-    // Set the aspect ratio of the clipping area to match the viewport
-    glMatrixMode(GL_PROJECTION);  // To operate on the Projection matrix
-    glLoadIdentity();             // Reset the projection matrix
-    if (globals::windowWidth >= globals::windowHeight) {
-       clipAreaXLeft   = -1.0 * aspect;
-       clipAreaXRight  = 1.0 * aspect;
-       clipAreaYBottom = -1.0;
-       clipAreaYTop    = 1.0;
-    } else {
-       clipAreaXLeft   = -1.0;
-       clipAreaXRight  = 1.0;
-       clipAreaYBottom = -1.0 / aspect;
-       clipAreaYTop    = 1.0 / aspect;
-    }
-    gluOrtho2D(clipAreaXLeft, clipAreaXRight, clipAreaYBottom, clipAreaYTop);
-
-    // Clear the screen and depth buffer
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    // Reset the matrix
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-
-    const char* text1 = "PAUSED";
-    glColor3ub(0,200,0);
-    glRasterPos2f(-0.1, 0);
-	for(int l=0; l<strlen(text1); l++)
-		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,text1[l]);
-
-    draw2DAxis(2);
-    // glBegin(GL_LINES);
-    //     glColor3ub(200,200,0);
-    //     glVertex2f(-0.1, 0.1);
-    //     glVertex2f( 0.1, 0.1);
-    // glEnd();
-
-    // ----- Stop Drawing Stuff! ------
-    glfwSwapBuffers(gameWindow); // Swap the buffers to display the scene (so we don't have to watch it being drawn!)
+    projection2D(0.45f);
+    globals::textHandler->drawText("PAUSED", T2D_CENTER);//new point3D(-0.18f,-0.05f,0));
+    glfwSwapBuffers(globals::gameWindow); // Swap the buffers to display the scene (so we don't have to watch it being drawn!)
     glfwPollEvents();
 }
 
 void drawMain() {
-    GLfloat aspect = (GLfloat)globals::windowWidth / (GLfloat)globals::windowHeight;
-    // Projection clipping area
-    GLdouble clipAreaXLeft, clipAreaXRight, clipAreaYBottom, clipAreaYTop;
-    // Set the aspect ratio of the clipping area to match the viewport
-    glMatrixMode(GL_PROJECTION);  // To operate on the Projection matrix
-    glLoadIdentity();             // Reset the projection matrix
-    GLfloat zoom = 0.45f;
-    if (globals::windowWidth >= globals::windowHeight) {
-       clipAreaXLeft   = -zoom * aspect;
-       clipAreaXRight  = zoom * aspect;
-       clipAreaYBottom = -zoom;
-       clipAreaYTop    = zoom;
-    } else {
-       clipAreaXLeft   = -zoom;
-       clipAreaXRight  = zoom;
-       clipAreaYBottom = -zoom / aspect;
-       clipAreaYTop    = zoom / aspect;
-    }
-    gluOrtho2D(clipAreaXLeft, clipAreaXRight, clipAreaYBottom, clipAreaYTop);
-
-    // glTranslatef(-0.6,0,0);
-    //glDisable(GL_DEPTH_TEST);
-    globals::textHandler->drawText("Press SPACE to start", new point3D(-0.58f,-0.05f,0));
-    // glEnable(GL_DEPTH_TEST);
-    // Clear the screen and depth buffer
-    // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    // // // Reset the matrix
-    // glMatrixMode(GL_MODELVIEW);
-    // glLoadIdentity();
-    //
-    // const char* text1 = "PRESS SPACE";
-    // glColor3ub(0,200,0);
-    // glRasterPos2f(-0.1, 0);
-	// for(int l=0; l<strlen(text1); l++)
-	// 	glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,text1[l]);
-    //
-    // draw2DAxis(2,-1);
-    //
-    // glBegin(GL_LINES);
-    //     glColor3ub(200,200,0);
-    //     glVertex2f(-0.1, 0.1);
-    //     glVertex2f( 0.1, 0.1);
-    // glEnd();
-
-    //globals::textHandler->drawText("Test: <>,.;:()!@#$%&*-+\\|/'\"");
-    // globals::textHandler->drawText("AaBbCcDdEeFfGgHhIiJjKkLl");
-
-    // ----- Stop Drawing Stuff! ------
-    glfwSwapBuffers(gameWindow); // Swap the buffers to display the scene (so we don't have to watch it being drawn!)
+    projection2D(0.45f);
+    globals::textHandler->drawText("Press SPACE to start", T2D_CENTER);
+    glfwSwapBuffers(globals::gameWindow); // Swap the buffers to display the scene (so we don't have to watch it being drawn!)
     glfwPollEvents();
 }
 
@@ -395,14 +212,15 @@ int main(int argc, char **argv)
     glfwWindowHint(GLFW_SAMPLES, 4);
 
     // Create a window
-    gameWindow = glfwCreateWindow(globals::windowWidth,globals::windowHeight,windowTitle, NULL, NULL);
-    if(gameWindow == NULL)
+    char windowTitle[] = "Space Mission 3: Lost in Space";
+    globals::gameWindow = glfwCreateWindow(globals::windowWidth,globals::windowHeight,windowTitle, NULL, NULL);
+    if(globals::gameWindow == NULL)
     {
         cout << "Failed to open window!" << endl;
         glfwTerminate();
         return 0;
     }
-    glfwMakeContextCurrent(gameWindow);
+    glfwMakeContextCurrent(globals::gameWindow);
     setFullScreen(globals::fullScreenMode);// Will set viewport and camera perspective
     globals::setFullScreen = setFullScreen;
     // ----- Initialise GLEE -----
@@ -422,19 +240,19 @@ int main(int argc, char **argv)
         glEnable(GL_LINE_SMOOTH);
 
     // Set the mouse cursor to the centre of our window
-    glfwSetCursorPos(gameWindow,globals::midWindowX, globals::midWindowY);
+    glfwSetCursorPos(globals::gameWindow,globals::midWindowX, globals::midWindowY);
     // Call our initGame function to set up our OpenGL options
     initGame();
     // Specify the function which should execute when the mouse is moved
-    glfwSetCursorPosCallback(gameWindow,handleMouseMove);
+    glfwSetCursorPosCallback(globals::gameWindow,handleMouseMove);
     // Specify the function which should execute when a mouse button is pressed or released
-    glfwSetMouseButtonCallback(gameWindow, handleMouseButton);
+    glfwSetMouseButtonCallback(globals::gameWindow, handleMouseButton);
 
     globals::started = false;
     globals::paused = true;
-	glfwSetKeyCallback(gameWindow,handleKeypressMenu);
+	glfwSetKeyCallback(globals::gameWindow,handleKeypressMenu);
     // glDisable(GL_DEPTH_TEST);
-    while (!glfwWindowShouldClose(gameWindow) && !globals::started)
+    while (!glfwWindowShouldClose(globals::gameWindow) && !globals::started)
     {
         drawMain();
         // Check for any OpenGL errors (providing the location we called the function from)
@@ -442,10 +260,10 @@ int main(int argc, char **argv)
     }
     glEnable(GL_DEPTH_TEST);
 	// Specify the function which should execute when a key is pressed or released
-	glfwSetKeyCallback(gameWindow,handleKeypress);
+	glfwSetKeyCallback(globals::gameWindow,handleKeypress);
 
     globals::paused = false;
-    while (!glfwWindowShouldClose(gameWindow))
+    while (!glfwWindowShouldClose(globals::gameWindow))
     {
         if(globals::paused){
             drawPaused();

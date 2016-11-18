@@ -10,6 +10,8 @@ default: mkout
 	$(BUILDER) $(SOURCE) $(CFLAGS) -o $(GNAME)
 debugLight: CFLAGS += -DLDEBUG
 debugLight: default
+debug: CFLAGS += -DDEBUG
+debug: default
 mkbin:
 	mkdir -p $(OUTDIR)
 mkdmodels:

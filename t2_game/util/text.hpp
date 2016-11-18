@@ -18,6 +18,11 @@ struct letterValues{
 	GLfloat left;
 	GLfloat right;
 };
+
+const GLint T2D_LEFT = -1;
+const GLint T2D_CENTER = 0;
+const GLint T2D_RIGHT = 1;
+
 class text{
 private:
 	std::vector<string> lines={
@@ -64,6 +69,7 @@ public:
 		text* _monospace = new text("monospace", 512, 512, 30, 59, 12, 7);
 		return _monospace;
 	}
-	void drawText(string aText,point3D* pos = nullptr);
+	void drawText(string aText, point3D* pos = nullptr);
+	void drawText(string aText, GLint align);
 };
 #endif

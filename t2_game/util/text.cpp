@@ -67,6 +67,20 @@ letterValues* text::setLetterValues(char *ch){
 	return chars[*ch];
 }
 
+void text::drawText(string aText, GLint align) {
+	GLfloat x = 0;
+	GLfloat y = this->letterHeight/-2;
+	GLfloat z = 0;
+	if(align == T2D_LEFT){
+		x = (aText.size() * this->letterWidth)*-1;
+	}else if(align == T2D_RIGHT){
+		x = 0;
+	}else{//T2D_CENTER
+		x = ((aText.size() / 2) * this->letterWidth)*-1;
+	}
+	this->drawText(aText, new point3D(x,y,z));
+}
+
 void text::drawText(string aText,point3D* pos) {
 	glDisable(GL_DEPTH_TEST);
 	if(this->textureId==-1){
