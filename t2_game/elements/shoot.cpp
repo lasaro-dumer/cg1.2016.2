@@ -22,6 +22,7 @@ void shoot::draw() {
     glRotatef(this->position->getYRot(), 0.0f, 1.0f, 0.0f);        // Rotate our camera on the  y-axis (looking left and right)
     this->afterDraw();
     this->age++;
+	// std::cout << "shoot at " << this->position->toString() << std::endl;
 }
 
 bool shoot::hitAsteroid(asteroid* a){

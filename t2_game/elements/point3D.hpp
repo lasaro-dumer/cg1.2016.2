@@ -54,6 +54,11 @@ public:
 		this->setYRot(newPos->getYRot());
 		this->setZRot(newPos->getZRot());
 	}
+	void increment(GLfloat x, GLfloat y, GLfloat z) {
+		this->x += x;
+		this->y += y;
+		this->z += z;
+	}
     string toString(){
         stringstream ss;
         ss << "("<<this->x<<","<<this->y<<","<<this->z<<")@("<<this->xr<<","<<this->yr<<","<<this->zr<<")";

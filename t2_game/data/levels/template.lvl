@@ -1,0 +1,14 @@
+# globals::modelObjs["asteroid1"],new point3D(50,40,50,0.5f,0,0),1000.0f,0.5f));
+# model,pos,mass,speed[,majorR,minorR]
+# asteroid* ast1 = new asteroid(globals::modelObjs["asteroid1"],new point3D(0,0,0),1000.0f, 0.05f,100,150
+# model mass speed
+# pos x y z
+base asteroid1 1000.0 0.5
+pos 50 40 50
+base asteroid1 1000.0 0.5
+pos 0 0 0
+orbit 100 150
+sub_start
+base asteroid1 500.0 0.5
+orbit 50 70
+sub_end

@@ -2,6 +2,7 @@ CFLAGS = -std=c++11 -lglut -lGL -lGLU -lGLee -lglfw3 -lGL -lSOIL -lX11 -lXi -lXr
 OUTDIR = bin
 MODELSOUT = $(OUTDIR)/data/models
 FONTSOUT = $(OUTDIR)/data/fonts
+LEVELSOUT = $(OUTDIR)/data/levels
 GNAME = $(OUTDIR)/spaceMission3
 BUILDER = g++
 SOURCE = *.cpp elements/*.cpp util/*.cpp util/helpers/*.cpp
@@ -18,13 +19,17 @@ mkdmodels:
 	mkdir -p $(MODELSOUT)
 mkdfonts:
 	mkdir -p $(FONTSOUT)
+mkdlevels:
+	mkdir -p $(LEVELSOUT)
 cpmodels:
 	cp -r data/models/*.obj $(MODELSOUT)
 cpfonts:
 	cp -r data/fonts/*.jpg $(FONTSOUT)
+cplevels:
+	cp -r data/levels/*.lvl $(LEVELSOUT)
 cpopt:
 	cp options.ini $(OUTDIR)/options.ini
-mkout: mkbin cpopt mkdmodels cpmodels mkdfonts cpfonts
+mkout: mkbin cpopt mkdmodels cpmodels mkdfonts cpfonts mkdlevels cplevels
 
 clean:
 	rm -rf *.o *.gch $(OUTDIR)

@@ -7,10 +7,10 @@
 #include "../util/smmath.hpp"
 
 void baseElement::calculateMovementForward(){
-    // Control X-Axis movement
     this->xMove = 0.0f;
     this->yMove = 0.0f;
     this->zMove = 0.0f;
+    // Control X-Axis movement
     float pitchFactor = cos(toRads(this->position->getXRot()));
     this->xMove += ( this->speedFactor * float(sin(toRads(this->position->getYRot()))) ) * pitchFactor;
     // Control Y-Axis movement
@@ -33,17 +33,13 @@ void baseElement::calculateMovementForward(){
         this->zMove = this->speedFactor;
     if (this->zMove < -this->speedFactor)
         this->zMove = -this->speedFactor;
-
-    //std::cout << "position " << this->position->toString() << " movement: ("<<this->xMove<<","<<this->yMove<<","<<this->zMove<<")" << std::endl;
 }
 
 void baseElement::beforeDraw() {
 	if(this->circularMove){
         this->position->update(positionInCircle(this->center, this->curOrbitPoint, this->majorR, this->minorR));
 	}else{
-        this->position->setX(this->position->getX()+this->xMove);
-        this->position->setY(this->position->getY()+this->yMove);
-        this->position->setZ(this->position->getZ()+this->zMove);
+		this->position->increment(this->xMove, this->yMove, this->zMove);
     }
     glColor3ub(this->color->getR(), this->color->getG(), this->color->getB());
     glTranslatef(this->position->getX(),this->position->getY(),this->position->getZ());

@@ -2,7 +2,9 @@
 #define smmathH
 #include <vector>
 #include "../elements/point3D.hpp"
-const float PI = 3.141592654f;
+#ifndef PI
+#define PI 3.141592654f
+#endif
 const float TO_RADS = PI / 180.0f; // The value of 1 degree in radians
 // Function to convert degrees to radians
 float toRads(const float &theAngleInDegrees);

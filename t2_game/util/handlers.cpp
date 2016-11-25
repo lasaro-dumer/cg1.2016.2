@@ -19,8 +19,7 @@ void handleMouseMove(GLFWwindow* window, double mouseX, double mouseY)
 void handleMouseButton(GLFWwindow* window, int button, int action, int mods)
 {
     if (!globals::paused && button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
-        shoot* s = new shoot(globals::cameraFPS->getCurrentPosition(),globals::modelObjs["shoot1"],5);
-        s->setSpeed(0.25f);
+        shoot* s = new shoot(globals::cameraFPS->getCurrentPosition(),globals::modelObjs["shoot1"],5,globals::gameOptions.getShootSpeed());
         globals::shoots.push_back(s);
     }
 }

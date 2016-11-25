@@ -17,7 +17,7 @@ private:
 	bool useAmbient;
     int fullscreenWidth,fullscreenHeight;
     int windowedWidth,windowedHeight;
-    GLfloat sensitivity,speed;
+    GLfloat sensitivity,cameraSpeed,shootSpeed;
 public:
     options(){
         this->saved = false;
@@ -54,8 +54,10 @@ public:
             std::cout << "option " << optName << "\t= " << value<< std::endl;
             if (strcmp(optName, "sensitivity") == 0 ){
                 this->sensitivity = value;
-            }else if (strcmp(optName, "speed") == 0 ){
-                this->speed = value;
+            }else if (strcmp(optName, "speed.camera") == 0 ){
+                this->cameraSpeed = value;
+            }else if (strcmp(optName, "speed.shoot") == 0 ){
+                this->shootSpeed = value;
             }else if (strcmp(optName, "fullscreen") == 0 ){
                 this->fullscreen = value;
             }else if (strcmp(optName, "fullscreen.maxSize") == 0 ){
@@ -89,7 +91,8 @@ public:
     bool isFullscreenMaxSize(){ return this->fullscreenMaxSize;}
     bool useAmbientLight(){ return this->useAmbient;}
     int getMouseSensitivity(){ return this->sensitivity;}
-    int getSpeed(){ return this->speed;}
+    int getCameraSpeed(){ return this->cameraSpeed;}
+    int getShootSpeed(){ return this->shootSpeed;}
     int getFullscreenWidth(){ return this->fullscreenWidth;}
     int getFullscreenHeight(){ return this->fullscreenHeight;}
     int getWindowedWidth(){ return this->windowedWidth;}

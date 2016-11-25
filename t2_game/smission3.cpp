@@ -15,6 +15,7 @@
 #include "util/glhelp.hpp"
 #include "util/camera.hpp"
 #include "util/options.hpp"
+#include "util/level.hpp"
 #include "util/smmath.hpp"
 #include "util/handlers.hpp"
 #include "util/helpers/guides.hpp"
@@ -26,6 +27,7 @@
 
 using namespace std;
 
+level* currentLvl;
 void initGame()
 {
     globals::gameOptions.load();
@@ -40,7 +42,7 @@ void initGame()
 
     globals::cameraFPS = new camera();
     globals::cameraFPS->setMouseSensitivity(globals::gameOptions.getMouseSensitivity());
-    globals::cameraFPS->setSpeed(globals::gameOptions.getSpeed());
+    globals::cameraFPS->setSpeed(globals::gameOptions.getCameraSpeed());
     setFullScreen(globals::gameOptions.isFullscreen());
     // ----- GLFW Settings -----
     //glfwSetInputMode(gameWindow,GLFW_CURSOR,GLFW_CURSOR_DISABLED); // Hide the mouse cursor
@@ -99,15 +101,14 @@ void initGame()
     glEnable(GL_COLOR_MATERIAL);
     // Set Material properties to follow glColor values
     glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-
-    globals::asteroids.push_back(new asteroid(globals::modelObjs["asteroid1"],new point3D(50,40,50,0.5f,0,0),1000.0f,0.5f));
-    asteroid* ast1 = new asteroid(globals::modelObjs["asteroid1"],new point3D(0,0,0),1000.0f, 0.05f,100,150);
-    globals::asteroids.push_back(ast1);
-    asteroid* ast2 = new asteroid(globals::modelObjs["asteroid1"],ast1->getPosition(),800.0f ,0.5f,20,20);
-    globals::asteroids.push_back(ast2);
-
+    currentLvl = new level();
     // Check for any OpenGL errors (providing the location we called the function from)
     checkGLError("initGame");
+}
+
+void computeLevel() {
+    if(!currentLvl->isLoaded())
+        currentLvl->loadFromFile("data/levels/level01.lvl");
 }
 
 // Function to draw our spheres and position the light source
@@ -132,6 +133,7 @@ void drawScene(){
     glEnable(GL_LIGHTING);
     glTranslatef(-lightPos[0],-lightPos[1],-lightPos[2]);
     #endif
+    #ifdef D_GUIDES
     //*
     //drawCheesGrid(600,20,-10);
     // Draw the lower ground-grid
@@ -141,6 +143,7 @@ void drawScene(){
     glTranslatef(0.0f, 200.0f, 0.0f);
     drawGround();
     glPopMatrix();
+    #endif
 
     draw3DAxis(300);
 
@@ -271,6 +274,7 @@ int main(int argc, char **argv)
         if(globals::paused){
             drawPaused();
         }else{
+			computeLevel();
             // Draw our scene
             drawScene();
             // Move our camera
