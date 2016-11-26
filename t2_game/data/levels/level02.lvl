@@ -1,11 +1,16 @@
 base asteroid1 3000.0 0.05
 pos 0 0 0
-orbit 100 150
 sub_start
     base asteroid1 800.0 0.15
-    orbit 50 70
+    orbit 70 70
     sub_start
         base asteroid1 300.0 0.2
         orbit 20 20
     sub_end
+sub_end
+base asteroid1 3000.0 0.05
+pos 200 100 50
+sub_start
+    base asteroid1 800.0 0.15
+    orbit 50 60
 sub_end

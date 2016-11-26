@@ -14,6 +14,7 @@ GLint globals::windowHeight;
 GLfloat globals::midWindowX;
 GLfloat globals::midWindowY;
 map<string,modelObj*> globals::modelObjs;
+map<string, audio*> globals::sounds;
 list<shoot*> globals::shoots;
 list<asteroid*> globals::asteroids;
 GLfloat globals::lightPos[4];

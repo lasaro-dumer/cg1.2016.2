@@ -19,6 +19,7 @@
 #include "util/smmath.hpp"
 #include "util/handlers.hpp"
 #include "util/helpers/guides.hpp"
+#include "util/audio.hpp"
 #include "elements/point3D.hpp"
 #include "elements/colorRgb.hpp"
 #include "elements/shoot.hpp"
@@ -39,6 +40,15 @@ void initGame()
     globals::modelObjs["shoot1"] = new modelObj(new colorRgb(255,60,0),true);
     globals::modelObjs["shoot1"]->loadFromFile("data/models/shoot1.obj");
     //modelObjs["shoot1"]->drawVolume = true;
+    globals::modelObjs["shoot2"] = new modelObj(new colorRgb(0,255,0),true);
+    globals::modelObjs["shoot2"]->loadFromFile("data/models/shoot2.obj");
+    //modelObjs["shoot2"]->drawVolume = true;
+
+    globals::sounds["laser1"] = new audio("data/audio/laser_01.wav");
+    globals::sounds["laser2"] = new audio("data/audio/laser_02.wav");
+    globals::sounds["level1"] = new audio("data/audio/level_up_01.wav");
+    globals::sounds["level2"] = new audio("data/audio/level_up_02.wav");
+    globals::sounds["victory1"] = new audio("data/audio/success.wav");
 
     globals::cameraFPS = new camera();
     globals::cameraFPS->setMouseSensitivity(globals::gameOptions.getMouseSensitivity());
@@ -106,9 +116,27 @@ void initGame()
     checkGLError("initGame");
 }
 
-void computeLevel() {
-    if(!currentLvl->isLoaded())
-        currentLvl->loadFromFile("data/levels/level01.lvl");
+bool computeLevel() {
+    bool hasAsteroids = globals::asteroids.size() != 0;
+
+    if(!hasAsteroids){
+        if(globals::gameOptions.hasNextLevel()){
+            if(globals::gameOptions.playSuccessAudio()){
+                pthread_t ts;
+                pthread_create(&ts, NULL, audio::playSoundAsync, globals::sounds["level2"]);
+            }
+            string levelName = globals::gameOptions.nextLevel();
+            currentLvl->loadFromFile(levelName);
+        }
+        else{
+            globals::started = false;
+            if(globals::gameOptions.playSuccessAudio()){
+                pthread_t ts;
+        	    pthread_create(&ts, NULL, audio::playSoundAsync, globals::sounds["victory1"]);
+            }
+        }
+    }
+    return false;
 }
 
 // Function to draw our spheres and position the light source
@@ -193,6 +221,13 @@ void drawMain() {
     glfwPollEvents();
 }
 
+void drawWin() {
+    projection2D(0.45f);
+    globals::textHandler->drawText("You WIN!!", T2D_CENTER);//new point3D(-0.18f,-0.05f,0));
+    glfwSwapBuffers(globals::gameWindow); // Swap the buffers to display the scene (so we don't have to watch it being drawn!)
+    glfwPollEvents();
+}
+
 // Fire it up...
 int main(int argc, char **argv)
 {
@@ -269,7 +304,7 @@ int main(int argc, char **argv)
 	glfwSetKeyCallback(globals::gameWindow,handleKeypress);
 
     globals::paused = false;
-    while (!glfwWindowShouldClose(globals::gameWindow))
+    while (!glfwWindowShouldClose(globals::gameWindow) && globals::started)
     {
         if(globals::paused){
             drawPaused();
@@ -278,8 +313,18 @@ int main(int argc, char **argv)
             // Draw our scene
             drawScene();
             // Move our camera
-            globals::cameraFPS->move();
+            globals::cameraFPS->move(globals::asteroids);
         }
+        // Check for any OpenGL errors (providing the location we called the function from)
+        checkGLError("Main loop");
+    }
+    glfwSetKeyCallback(globals::gameWindow,handleKeypressMenu);
+    glfwSetMouseButtonCallback(globals::gameWindow, NULL);
+    glfwSetCursorPosCallback(globals::gameWindow,NULL);
+    // glDisable(GL_DEPTH_TEST);
+    while (!glfwWindowShouldClose(globals::gameWindow))
+    {
+        drawWin();
         // Check for any OpenGL errors (providing the location we called the function from)
         checkGLError("Main loop");
     }

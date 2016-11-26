@@ -5,6 +5,7 @@
 #include "text.hpp"
 #include "camera.hpp"
 #include "options.hpp"
+#include "audio.hpp"
 #include "../elements/modelObj.hpp"
 #include "../elements/shoot.hpp"
 #include "../elements/asteroid.hpp"
@@ -21,6 +22,7 @@ public:
 	static GLfloat midWindowX;
 	static GLfloat midWindowY;
 	static map<string,modelObj*> modelObjs;
+	static map<string, audio*> sounds;
 	static list<shoot*> shoots;
 	static list<asteroid*> asteroids;
 	static GLfloat  lightPos[];

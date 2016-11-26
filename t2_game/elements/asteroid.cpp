@@ -33,7 +33,7 @@ void asteroid::takeHit(GLfloat damage){
     }else{
         this->hitPoints-=damage;
         if(this->hitPoints == 0){
-            if(this->mass > 100){
+            if(this->mass >= 500){
                 bool startInCenter = true;
                 GLfloat childCount = 5;
                 GLfloat childMass = this->mass / childCount;

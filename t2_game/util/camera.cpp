@@ -129,14 +129,36 @@ void camera::calculateCameraMovement()
         this->camZSpeed = -this->speedFactor;
 }
 
+bool camera::collide(asteroid* a){
+    point3D* ac = a->getPosition();//getModel()->center;
+    // point3D* c = this->position;//oModel->center;
+    GLfloat xd = pow((this->camXPos+this->camXSpeed) - ac->getX(),2);
+    GLfloat yd = pow((this->camYPos+this->camYSpeed) - ac->getY(),2);
+    GLfloat zd = pow((this->camZPos+this->camZSpeed) - ac->getZ(),2);
+    //d = sq (xb-xa)^2 + (yb-ya)^2
+    GLfloat d = sqrt(xd+yd+zd);
+    GLfloat hitD = a->getRadius();
+    //std::cout << "d: " << d << " hitD: " << hitD << std::endl;
+    return (d < hitD);
+}
+
 // Function to move the camera the amount we've calculated in the calculateCameraMovement function
-void camera::move()
+void camera::move(list<asteroid*> asteroids)
 {
-    // Calculate our camera movement
-    this->calculateCameraMovement();
-    this->camXPos += this->camXSpeed;
-    this->camYPos += this->camYSpeed;
-    this->camZPos += this->camZSpeed;
+    bool canMove = true;
+    // list<asteroid*>::iterator ia;
+    // for (ia = asteroids.begin(); (ia != asteroids.end() && canMove); ++ia)
+    //     if((*ia)->isAlive())
+    //         if(this->collide((*ia)))
+    //             canMove = false;
+
+    if(canMove){
+        // Calculate our camera movement
+        this->calculateCameraMovement();
+        this->camXPos += this->camXSpeed;
+        this->camYPos += this->camYSpeed;
+        this->camZPos += this->camZSpeed;
+    }
 }
 
 camera::~camera(){

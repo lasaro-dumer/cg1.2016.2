@@ -1,6 +1,8 @@
 #ifndef cameraH
 #define cameraH
 #include <GLee.h>
+#include <list>
+#include "../elements/asteroid.hpp"
 #include "../elements/point3D.hpp"
 
 class camera {
@@ -60,7 +62,8 @@ public:
     void setSpeed(GLfloat value){ this->speedFactor = value;}
     void setPerspective(GLint windowHeight,GLint windowWidth);
     void rotate(double vertMovement,double horizMovement);
-    void move();
+    bool collide(asteroid* a);
+    void move(list<asteroid*> asteroids);
     void draw();
     point3D* getCurrentPosition();
     void updateMovements(bool forward,bool backward,bool left, bool right);

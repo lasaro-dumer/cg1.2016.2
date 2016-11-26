@@ -43,14 +43,14 @@ public:
         point3D* pos;
         bool isNew = false, isSub = false, hasOrbit = false;
         while(res != EOF){
-            std::cout << "lineType: " << lineType << std::endl;
+            // std::cout << "lineType: " << lineType << std::endl;
             if (strcmp( lineType, "base" ) == 0 ){
                 fscanf(file, "%s %f %f\n", model, &mass, &speed);
                 isNew = true;
                 hasOrbit = false;
                 major = 0;
                 minor = 0;
-            }else if (strcmp( lineType, "pos" ) == 0 && !isSub){
+            }else if (strcmp( lineType, "pos" ) == 0){
                 fscanf(file, "%f %f %f\n", &x, &y, &z );
                 pos = new point3D(x,y,z);
             }else if (strcmp( lineType, "orbit" ) == 0 ){
@@ -64,7 +64,7 @@ public:
             res = fscanf(file, "%s", lineType);
             if(res == EOF || (strcmp( lineType, "base" ) == 0 )){
                 if(isNew){
-                    std::cout << "Adding a " <<model <<" with " <<mass<<" and "<<speed<<" at "<< pos->toString() << std::endl;
+                    // std::cout << "Adding a " <<model <<" with " <<mass<<" and "<<speed<<" at "<< pos->toString() << std::endl;
                     asteroid* ast;
                     if(hasOrbit)
                         ast = new asteroid(globals::modelObjs[model], pos, mass, speed, major, minor);
