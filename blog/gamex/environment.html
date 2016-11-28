@@ -1,0 +1,25 @@
+<h3>Camera, Movimentação e <i>Inputs</i></h3>
+
+<p>
+    Para o tratamento da camera era nescessário que a mesma fosse tridimensional e que sua movimentação fosse fácil. No site r3dux.org existe um tutorial com um exemplo muito bom que satisfaz estes requisitos. O código do tutotial era um pouco datado e não orientado a objetos, então este foi atualizado e melhorado.
+</p>
+<p>
+	Primeiramente foi nescessário atualizar a biblioteca responsável de gerenciar a tela e os <i>inputs</i> de teclado e <i>mouse</i>. A biblioteca utilizada é a GLFW. Para obter a versão mais recente (versão 3.0) e os recursos mais avançados desta bibioteca foi nescessário instala-la a partir de seu código fonte, devido a não existência de uma versão atualizada para o sistema operacional utilizado (Ubuntu 15.04). O código fonte e o processo de instalação manual estão descritos no site da <a href="#">GLFW</a>.
+</p>
+<p>
+    Com as modificações feitas ao código foi possivel alcançar os requisitos de camera e movimentação da seguinte forma:
+</p>
+<ul>
+    <li>A câmera é uma projeção OpenGL Frustum</li>
+    <li>É possível a movimentação em todas as direções, usando-se:
+        <ul>
+            <li><b>W</b>: Mover para frente</li>
+            <li><b>S</b>: Mover para trás</li>
+            <li><b>A</b>: Mover para esquerda</li>
+            <li><b>D</b>: Mover para direita</li>
+            <li><b>Shift</b>: Mover para baixo</li>
+            <li><b>Espaço</b>: Mover para cima</li>
+            <li><b>Movimento do <i>mouse</i></b>: Mover orientação da câmera</li>
+        </ul>
+    </li>
+</ul>
