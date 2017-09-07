@@ -1,0 +1,138 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+
+\title{Space Mission 3: \\Lost in space}
+\author{Lásaro Curtinaz Dumer }
+\date{2016}
+
+\usepackage{natbib}
+\usepackage{graphicx}
+
+\begin{document}
+
+\maketitle
+
+\section{Introdução}
+
+Como c da disciplina de Computação Gráfica devemos desenvolver um jogo de computador utilizando OpenGL.
+
+
+O jogo escolhido será um \textit{shooter} (jogo de tiro, ação) ambientado no espaço. O projeto inicial do jogo será criar um ambiente em três dimensões e que permita movimentos em todas as direções, em seguida inimigos serão inseridos neste ambiente e também os projéteis que deverão causar dano. Parte deste projeto é inspirado em clássicos como \textit{Asteroids} e \textit{Wing Commander}.
+
+
+\subsection{História do jogo}
+Você estava retornando para o sistema solar de sua unidade de comando quando o \textit{hyper-drive} de sua nave falhou. Agora você se encontra em um ponto desconhecido do espaço e precisa retornar para casa, para isto deve destruir os asteroides.
+
+\section{Desenvolvimento}
+
+Nesta seção será descrito o processo de desenvolvimento, as descobertas realizadas no decorrer deste e as funcionalidades implementadas.
+
+\subsection{Câmera, Movimentação e \textit{Inputs}}
+
+Para o tratamento da câmera era necessário que a mesma fosse tridimensional e que sua movimentação fosse fácil. No site r3dux.org \citep{R3DUX} existe um tutorial com um exemplo muito bom que satisfaz estes requisitos. O código do tutorial era um pouco datado e não orientado a objetos, então este foi atualizado e melhorado.
+
+
+Primeiramente foi necessário atualizar a biblioteca responsável de gerenciar a tela e os inputs de teclado e mouse. A biblioteca utilizada é a GLFW \citep{GLFW}. Para obter a versão mais recente (versão 3.0) e os recursos mais avançados desta biblioteca foi necessário instala-la a partir de seu código fonte, devido a não existência de uma versão atualizada para o sistema operacional utilizado (Ubuntu 15.04). O código fonte e o processo de instalação manual estão descritos no site da GLFW.
+
+
+Com as modificações feitas ao código foi possível alcançar os requisitos de câmera e movimentação da seguinte forma:
+
+\begin{itemize}
+    \item A câmera é uma projeção OpenGL Frustum
+    \item É possível a movimentação em todas as direções, usando-se:
+    \begin{itemize}
+        \item W: Mover para frente
+        \item S: Mover para trás
+        \item A: Mover para esquerda
+        \item D: Mover para direita
+        \item Shift: Mover para baixo
+        \item Espaço: Mover para cima
+        \item Movimento do mouse: Mover orientação da câmera
+    \end{itemize}
+    \item São realizadas operações de Rotação e Translação utilizando os atributos da câmera
+    \item É possível obter \textit{fullscreen} pressionando F1
+\end{itemize}
+
+
+\subsection{Objetos e Modelos}
+\label{sec:modelObj}
+
+O desenho dos objetos de jogo é feito utilizando-se as diretivas do OpenGL aplicadas a um espaço tri-dimensional. A complexidade desejada para os objetos fazia com que a codificação delas diretamente na aplicação se tornasse grande e complexa, então foi tomada a decisão de modelar os objetos na ferramenta Blender \citep{BLENDER} e posteriormente exportadas no formato \textit{.obj}.
+
+Com os modelos gerados foi criado então uma classe (\textit{modelObj.hpp}) para gerenciar o carregamento destes objetos e o desenho dos mesmos quando necessário. As informações armazenadas no arquivo \textit{.obj} são os vértices do objeto e as faces compostas por três vértices. Com estas informações a classe de objeto consegue ter uma coleção de triângulos que devem ser desenhados com a diretiva \textit{glBegin(GL\_TRIANGLES)}.
+
+Os vértices do objeto também são utilizados para calcular o centro deste e com o centro é possível calcular também o raio médio do objeto, estes valores serão utilizados na Seção \ref{sec:coli}.
+
+\subsubsection{Elemento base: baseElement}
+
+Todos os objetos que serão desenhados deverão possuir uma interface muito similar, então foi criada uma classe (baseElement.hpp) para realização das operações mais genericas. Um atributo importante da classe baseElement é o atributo que define os dados tridimencionais do modelo, pois se o modelo ja foi carregado do arquivo é ele que será desenhado, e não a esfera padrão da classe baseElement.
+
+A base de um elemento tambem possui outros atributos e métodos interessantes Entre eles estão:
+
+\begin{itemize}
+	\item center: o centro da orbita do objeto, se este possuir uma orbita
+	\item position: a posição do elemento
+	\item speedFactor: fator de calculo para a velocidade do objeto
+	\item colorRgb: cor que deve ser aplicada ao glColor3ub quando o objeto for desenhado
+	\item virtual draw(): função virtual que os elementos devem implementar para realizarem seu desenho
+	\item beforeDraw(): função que os elementos devem invocar no inicio de sua função draw
+	\item afterDraw(): função que os elementos devem incovar após terminarem de serem desenhados
+	\item virtual isAlive(): função virtual que os elementos devem implementar para que seja possivel determinar se ainda devem ser desenhados
+\end{itemize}
+
+Internamente também são utilizados atributos e métodos para o calculo de e atualização do movimento do objeto, como antes de depois de ser desenhado.
+
+Para facilitar o manuseio de vértices e pontos de localização foi criada uma simples classe com atributos GLfloat, a classe point3D.
+
+\subsection{Projéteis e orientação}
+
+Como representação de projéteis foram modelados dois objetos, conforme Figura \ref{fig:shoots}. Com estes modelos uma classe extendendo baseElement foi criada (shoot.hpp) para realizar o processo de desenho e tempo de vida de um projétil. Além dos atributos base de um elemento a classe de um projétil tambem possui atributos relacionados ao dano aplicado a outros objetos.
+
+\begin{figure}[]
+    \centering
+    \includegraphics[scale=0.5]{Shoots.png}
+    \caption{Projéteis}
+    \label{fig:shoots}
+\end{figure}
+
+A criação de um projétil acontece ao pressionar dos botões direito e esquerdo do mouse. O projétil será criado no ponto de localização da câmera e seu movimento será orientado na direção que a câmera estiver olhando. A velocidade de cada projétil é controlada por opções de inicialização, descritas em Seção \ref{sec:bonus}
+
+\subsection{Iluminação}
+
+A iluminação foi algo um pouco mais dificil de obter um resultado agradável para a experiência de jogo. Ao tentar utilizar um ponto de origem para a luz da cena, aplicar valores variados as variavies de controle de iluminação (difusão, ambiente e especular) o melhor resultado obtido foi utilizando a localização da camera como ponto de origem. Porem o melhor resultado foi obtido quando a luz ambiente prevaleceu sobre as outras, ou seja, ao abrir mão das oturas variaveis ajustando-as à zero e ajustando a luz ambiente para um nivel alto.
+
+Como resultado final é possivel observar nitidamente os objetos e suas cores de forma mais viva, dando um clima mais cartoon para o ambiente de jogo. Ainda assim é possivel utilizar as outras variaveis de luz ao invés da ambiente ajustando a devida opção descrita na Seção \ref{sec:bonus}.
+
+\subsection{Colisões e Consequências}
+\label{sec:coli}
+
+As formas variadas e mais arredondadas dos objetos modelados facilitaram a utilização do tratamento de colisão utilizando esferas de colisão. Com isso todos os objetos deveriam possuir um centro e um raio, conforme descrito na Seção \ref{sec:modelObj} o centro e o raio dos objetos são calculados no momento que estes são carregados.
+
+O centro de um objeto é obtido através da funçao centroid apresentada no Listing \ref{list:centroid}, que recebe como entrada os vertices cujo centro deve ser calculado, e tem como saida o ponto central destes vertices. Para obter este ponto é realizada a média de cada componente dos pontos.
+
+\label{list:centroid}
+point3D* centroid(vector<point3D*> vertices){
+    GLfloat xSum=0,ySum=0,zSum=0;
+    GLfloat count = vertices.size() == 0.0f ? 1.0f : (GLfloat)vertices.size();
+    for (int i = 0; i < vertices.size(); i++) {
+        xSum+=vertices[i]->getX();
+        ySum+=vertices[i]->getY();
+        zSum+=vertices[i]->getZ();
+    }
+    GLfloat xMean = xSum/count;
+    GLfloat yMean = ySum/count;
+    GLfloat zMean = zSum/count;
+    return new point3D(xMean,yMean,zMean);
+}
+
+
+
+
+\subsection{Textos na Tela}
+\subsection{Movimentação orbital}
+\subsection{Bônus}
+\label{sec:bonus}
+
+\bibliographystyle{plain}
+\bibliography{references}
+\end{document}
