@@ -6,7 +6,7 @@
 #include <iostream>
 #include <map>
 #include <GLee.h>
-#include <SOIL.h>
+#include <SOIL/SOIL.h>
 #include "../elements/point3D.hpp"
 
 using namespace std;

@@ -4,7 +4,6 @@
 #include <iostream>
 #include <map>
 #include <GLee.h>
-#include <SOIL.h>
 #include "../elements/point3D.hpp"
 #include "text.hpp"
 

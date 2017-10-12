@@ -3,7 +3,7 @@
 #include <GLee.h>         // No need to link to GL/gl.h
 #include <GLFW/glfw3.h>      // Include OpenGL Framework library
 #include <GL/freeglut.h>  // Include FreeGLUT so we can easily draw spheres and calculate our viewing frustrum
-#include <SOIL.h>
+#include <SOIL/SOIL.h>
 #include <math.h>         // Used only for sin() and cos() functions
 #include <list>
 #include <map>
